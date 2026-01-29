@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor
+@Table(name = "users") // 테이블명 users로 지정
 public class User {
 
     @Id // PK
