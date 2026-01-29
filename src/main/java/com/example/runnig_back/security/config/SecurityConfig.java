@@ -28,7 +28,6 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()       // 회원가입, 로그인 API 경로 허용
-                        .requestMatchers("/api/auth/signup", "/api/auth/login").permitAll() // 회원가입, 로그인 API 경로 허용
                         .requestMatchers("/h2-console/**").permitAll()     // H2 데이터베이스 콘솔 허용
                         .requestMatchers("/login", "/signup").permitAll()  // 나중에 만들 커스텀 HTML 페이지 경로 허용
                         .requestMatchers("/css/**", "/js/**").permitAll()// 페이지에 필요한 정적 리소스(CSS, JS) 허용

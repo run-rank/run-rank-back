@@ -4,6 +4,8 @@ import com.example.runnig_back.dto.request.AuthRequest;
 import com.example.runnig_back.dto.request.LoginRequest;
 import com.example.runnig_back.dto.response.AuthResponse;
 import com.example.runnig_back.entity.User;
+import com.example.runnig_back.exception.CustomException;
+import com.example.runnig_back.exception.ErrorCode;
 import com.example.runnig_back.repository.UserRepository;
 import com.example.runnig_back.security.jwt.JwtProvider;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +25,7 @@ public class AuthService {
     @Transactional
     public void signup(AuthRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("이미 존재하는 이메일입니다.");
+            throw new CustomException(ErrorCode.EMAIL_DUPLICATION);
         }
 
         User user = User.builder()
@@ -37,10 +39,10 @@ public class AuthService {
 
     public AuthResponse login(LoginRequest request) {
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("가입되지 않은 이메일입니다."));
+                .orElseThrow(() -> new CustomException(ErrorCode.LOGIN_INPUT_INVALID));
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new RuntimeException("비밀번호가 일치하지 않습니다.");
+            throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
         }
 
         String accessToken = jwtProvider.createToken(user.getEmail());
