@@ -42,7 +42,7 @@ public class AuthService {
                 .orElseThrow(() -> new CustomException(ErrorCode.LOGIN_INPUT_INVALID));
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
+            throw new CustomException(ErrorCode.LOGIN_INPUT_INVALID);
         }
 
         String accessToken = jwtProvider.createToken(user.getEmail());

@@ -33,7 +33,8 @@ public class SecurityConfig {
                         .requestMatchers("/css/**", "/js/**").permitAll()// 페이지에 필요한 정적 리소스(CSS, JS) 허용
                         .requestMatchers("/v3/api-docs/**",
                                 "/swagger-ui/**",
-                                "/swagger-ui.html").permitAll() // Swagger API 문서 경로 허용
+                                "/swagger-ui.html",
+                                "/error").permitAll() // Swagger API 문서 경로 허용
                         .anyRequest().authenticated()                      // 그 외 모든 요청은 인증 필요
                 )
 

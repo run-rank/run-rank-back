@@ -1,6 +1,8 @@
 package com.example.runnig_back.controller;
 
 import com.example.runnig_back.entity.User;
+import com.example.runnig_back.exception.CustomException;
+import com.example.runnig_back.exception.ErrorCode;
 import com.example.runnig_back.repository.UserRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -31,7 +33,7 @@ public class UserController {
 
         // 3. DB에서 유저를 찾아 닉네임을 반환합니다.
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("유저를 찾을 수 없습니다."));
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         return ResponseEntity.ok("안녕하세요, " + user.getUserName() + "님!");
     }
