@@ -8,6 +8,7 @@ import com.example.runnig_back.exception.CustomException;
 import com.example.runnig_back.exception.ErrorCode;
 import com.example.runnig_back.repository.UserRepository;
 import com.example.runnig_back.security.jwt.JwtProvider;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -23,7 +24,7 @@ public class AuthService {
     private final BCryptPasswordEncoder passwordEncoder;
 
     @Transactional
-    public void signup(AuthRequest request) {
+    public void signup(@Valid AuthRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new CustomException(ErrorCode.EMAIL_DUPLICATION);
         }
