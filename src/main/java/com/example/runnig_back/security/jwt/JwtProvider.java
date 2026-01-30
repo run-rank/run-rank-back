@@ -24,7 +24,8 @@ public class JwtProvider {
     private String salt;
 
     private SecretKey secretKey;
-    private final long exp = 1000L * 60 * 60 * 24; // 24시간
+    private static final long ACCESS_EXP = 1000L * 30; // 24시간 1000L * 60 * 60 * 24;
+    private static final long REFRESH_EXP = 1000L * 60 * 60 * 24 * 7; // 7일
 
     @PostConstruct
     protected void init() {
@@ -39,7 +40,19 @@ public class JwtProvider {
         return Jwts.builder()
                 .claims(claims)
                 .issuedAt(now)
-                .expiration(new Date(now.getTime() + exp))
+                .expiration(new Date(now.getTime() + ACCESS_EXP))
+                .signWith(secretKey)
+                .compact();
+    }
+
+    // 리프레시 토큰 생성 메서드 추가
+    public String createRefreshToken(String email) {
+        Claims claims = Jwts.claims().subject(email).build();
+        Date now = new Date();
+        return Jwts.builder()
+                .claims(claims)
+                .issuedAt(now)
+                .expiration(new Date(now.getTime() + REFRESH_EXP)) // 리프레시 상수 적용
                 .signWith(secretKey)
                 .compact();
     }

@@ -41,4 +41,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
         return null;
     }
+
+    // JwtAuthenticationFilter.java 내부
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getRequestURI();
+        // 로그인, 회원가입, 토큰 갱신 경로는 JWT 검사를 건너뜁니다.
+        return path.startsWith("/api/auth/");
+    }
+
 }
