@@ -1,5 +1,6 @@
 package com.example.runnig_back.security.config; // 본인 패키지명에 맞게 수정
 
+import com.example.runnig_back.security.jwt.JwtAuthenticationEntryPoint;
 import com.example.runnig_back.security.jwt.JwtAuthenticationFilter;
 import com.example.runnig_back.security.jwt.JwtProvider;
 import lombok.RequiredArgsConstructor;
@@ -19,9 +20,10 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final JwtProvider jwtProvider;
+    private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http, JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -37,6 +39,8 @@ public class SecurityConfig {
                                 "/error").permitAll() // Swagger API 문서 경로 허용
                         .anyRequest().authenticated()                      // 그 외 모든 요청은 인증 필요
                 )
+                .exceptionHandling(exception ->
+                        exception.authenticationEntryPoint(jwtAuthenticationEntryPoint))
 
                 // 인증되지 않은 사용자가 보호된 페이지에 접근했을 때의 처리 (필요시 주석 해제)
                 /*
@@ -48,6 +52,7 @@ public class SecurityConfig {
 
                 .headers(headers -> headers.frameOptions(options -> options.disable()))
                 .addFilterBefore(new JwtAuthenticationFilter(jwtProvider), UsernamePasswordAuthenticationFilter.class);
+
 
         return http.build();
     }
