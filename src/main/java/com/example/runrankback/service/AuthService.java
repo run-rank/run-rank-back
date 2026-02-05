@@ -58,7 +58,7 @@ public class AuthService {
                     return token;
                 })
                 .orElse(RefreshToken.builder()
-                        .userEmail(user.getEmail())
+                        .user(user)
                         .refreshToken(refreshToken)
                         .build());
 
