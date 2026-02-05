@@ -3,6 +3,8 @@ package com.example.runrankback.config; // 본인 패키지명에 맞게 수정
 import com.example.runrankback.security.jwt.JwtAuthenticationEntryPoint;
 import com.example.runrankback.security.jwt.JwtAuthenticationFilter;
 import com.example.runrankback.security.jwt.JwtProvider;
+import com.example.runrankback.security.oauth.CustomOAuth2UserService;
+import com.example.runrankback.security.oauth.OAuth2SucessHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,13 +23,20 @@ public class SecurityConfig {
 
     private final JwtProvider jwtProvider;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+    private final CustomOAuth2UserService customOAuth2UserService;
+    private final OAuth2SucessHandler oAuth2SucessHandler;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http, JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint) throws Exception {
         http
+                // oauth 내용
+                .oauth2Login(oauth2 -> oauth2
+                        .userInfoEndpoint(userInfo -> userInfo
+                                .userService(customOAuth2UserService))
+                        .successHandler(oAuth2SucessHandler)
+                )
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()       // 회원가입, 로그인 API 경로 허용
                         .requestMatchers("/h2-console/**").permitAll()     // H2 데이터베이스 콘솔 허용

@@ -105,4 +105,33 @@ public class AuthService {
                 .userName(user.getUserName())
                 .build();
     }
+
+    /**
+     * 카카오(OAuth2) 로그인 성공 시 호출: 액세스/리프레시 토큰 발급 및 저장
+     */
+    @Transactional
+    public AuthResponse loginByOAuth2(User user) {
+        String accessToken = jwtProvider.createToken(user.getEmail());
+        String refreshToken = jwtProvider.createRefreshToken(user.getEmail());
+
+        // 리프레시 토큰 DB 저장 (기존 토큰이 있으면 업데이트, 없으면 신규 생성)
+        RefreshToken refreshTokenEntity = refreshTokenRepository.findByUserEmail(user.getEmail())
+                .map(token -> {
+                    token.updateRefreshToken(refreshToken);
+                    return token;
+                })
+                .orElse(RefreshToken.builder()
+                        .user(user)
+                        .refreshToken(refreshToken)
+                        .build());
+
+        refreshTokenRepository.save(refreshTokenEntity);
+
+        return AuthResponse.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .email(user.getEmail())
+                .userName(user.getUserName())
+                .build();
+    }
 }
