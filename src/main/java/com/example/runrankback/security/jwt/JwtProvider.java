@@ -24,7 +24,7 @@ public class JwtProvider {
     private String salt;
 
     private SecretKey secretKey;
-    private static final long ACCESS_EXP = 1000L * 30; // 24시간 1000L * 60 * 60 * 24;
+    private static final long ACCESS_EXP = 1000L * 60 * 60 * 24; // 24시간 1000L * 60 * 60 * 24;
     private static final long REFRESH_EXP = 1000L * 60 * 60 * 24 * 7; // 7일
 
     @PostConstruct

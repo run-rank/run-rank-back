@@ -40,6 +40,7 @@ public class AuthService {
         userRepository.save(user);
     }
 
+    @Transactional
     public AuthResponse login(LoginRequest request) {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new CustomException(ErrorCode.LOGIN_INPUT_INVALID));
@@ -52,7 +53,7 @@ public class AuthService {
         String refreshToken = jwtProvider.createRefreshToken(user.getEmail());
 
         // 4. 리프레시 토큰 DB 저장 (기존 토큰이 있으면 업데이트, 없으면 신규 생성)
-        RefreshToken refreshTokenEntity = refreshTokenRepository.findByUserEmail(user.getEmail())
+        RefreshToken refreshTokenEntity = refreshTokenRepository.findByUser_Email(user.getEmail())
                 .map(token -> {
                     token.updateRefreshToken(refreshToken);
                     return token;
@@ -87,7 +88,7 @@ public class AuthService {
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         // 3. DB에 저장된 토큰과 일치하는지 확인 (로그아웃 여부나 변조 확인)
-        RefreshToken savedToken = refreshTokenRepository.findByUserEmail(email)
+        RefreshToken savedToken = refreshTokenRepository.findByUser_Email(email)
                 .orElseThrow(() -> new CustomException(ErrorCode.UNAUTHORIZED));
 
         if (!savedToken.getRefreshToken().equals(refreshToken)) {
@@ -102,6 +103,35 @@ public class AuthService {
                 .accessToken(newAccessToken)
                 .refreshToken(refreshToken) // 기존 리프레시 토큰 유지
                 .email(email)
+                .userName(user.getUserName())
+                .build();
+    }
+
+    /**
+     * 카카오(OAuth2) 로그인 성공 시 호출: 액세스/리프레시 토큰 발급 및 저장
+     */
+    @Transactional
+    public AuthResponse loginByOAuth2(User user) {
+        String accessToken = jwtProvider.createToken(user.getEmail());
+        String refreshToken = jwtProvider.createRefreshToken(user.getEmail());
+
+        // 리프레시 토큰 DB 저장 (기존 토큰이 있으면 업데이트, 없으면 신규 생성)
+        RefreshToken refreshTokenEntity = refreshTokenRepository.findByUser_Email(user.getEmail())
+                .map(token -> {
+                    token.updateRefreshToken(refreshToken);
+                    return token;
+                })
+                .orElse(RefreshToken.builder()
+                        .user(user)
+                        .refreshToken(refreshToken)
+                        .build());
+
+        refreshTokenRepository.save(refreshTokenEntity);
+
+        return AuthResponse.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .email(user.getEmail())
                 .userName(user.getUserName())
                 .build();
     }
