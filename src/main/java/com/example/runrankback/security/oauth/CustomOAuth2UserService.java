@@ -22,9 +22,14 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
         OAuth2User oAuth2User = super.loadUser(userRequest);
 
-        // 카카오에서 받은 정보 추출 (예시)
+        // 카카오에서 받은 정보 추출
         Map<String, Object> kakaoAccount = (Map<String, Object>) oAuth2User.getAttributes().get("kakao_account");
         String email = kakaoAccount != null ? (String) kakaoAccount.get("email") : null;
+
+        // 이메일 동의 안 한 경우 예외 처리
+        if (email == null || email.isBlank()) {
+            throw new OAuth2AuthenticationException("카카오 이메일 정보가 필요합니다. 이메일 제공에 동의해주세요.");
+        }
 
         Map<String, Object> properties = (Map<String, Object>) oAuth2User.getAttributes().get("properties");
         String nickname = properties != null ? (String) properties.get("nickname") : null;
