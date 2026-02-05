@@ -18,7 +18,9 @@ public class RefreshToken {
     private Long id;
 
     @Column
-    private String userEmail;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
 
     @Column(nullable = false)
     private String refreshToken;
