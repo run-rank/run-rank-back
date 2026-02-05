@@ -37,7 +37,8 @@ spring:
         show_sql: true
 
   flyway:
-    enabled: true
+    validate-on-migrate: false        # 파일 수정 허용
+    clean-on-validation-error: true   # 에러 발생시 DB 새로 생성
     baseline-on-migrate: true
 
 jwt:
