@@ -24,11 +24,24 @@ public class User {
     @Column // 이름
     private String userName;
 
+    @Column // 로그인 제공자 (local, kakao)
+    private String provider;
+
+    @Column // 카카오 프로필 이미지 URL
+    private String profileImageUrl;
+
     @Builder
-    public User (String email, String password, String userName) {
+    public User (String email, String password, String userName, String provider, String profileImageUrl) {
         this.email = email;
         this.password = password;
         this.userName = userName;
+        this.provider = provider != null ? provider : "local";
+        this.profileImageUrl = profileImageUrl;
+    }
+
+    // 프로필 이미지 업데이트 메서드
+    public void updateProfileImage(String profileImageUrl) {
+        this.profileImageUrl = profileImageUrl;
     }
 
 

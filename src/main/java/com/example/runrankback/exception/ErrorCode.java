@@ -15,6 +15,10 @@ public enum ErrorCode {
     // User (404: 찾을 수 없음)
     USER_NOT_FOUND(404, "U001", "해당 사용자를 찾을 수 없습니다."),
 
+    // Kakao (카카오 관련 오류)
+    INVALID_KAKAO_TOKEN(401, "KAKAO001", "유효하지 않은 카카오 토큰입니다."),
+    KAKAO_API_ERROR(500, "KAKAO002", "카카오 API 호출 중 오류가 발생했습니다."),
+    KAKAO_EMAIL_NOT_PROVIDED(400, "KAKAO003", "카카오 계정에서 이메일 정보를 제공받지 못했습니다."),
 
     // Server (500: 서버 잘못)
     INTERNAL_SERVER_ERROR(500, "S001", "서버 내부 에러가 발생했습니다.");

@@ -1,6 +1,7 @@
 package com.example.runrankback.controller;
 
 import com.example.runrankback.dto.request.AuthRequest;
+import com.example.runrankback.dto.request.KakaoLoginRequest;
 import com.example.runrankback.dto.request.LoginRequest;
 import com.example.runrankback.dto.response.AuthResponse;
 import com.example.runrankback.service.AuthService;
@@ -43,6 +44,13 @@ public class AuthController {
     @PostMapping("/refresh")
     public ResponseEntity<AuthResponse> refresh(@RequestBody RefreshTokenRequest request){
         AuthResponse response = authService.refresh(request.getRefreshToken());
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "카카오 로그인", description = "카카오 액세스 토큰으로 로그인합니다. 신규 사용자는 자동 회원가입됩니다.")
+    @PostMapping("/kakao")
+    public ResponseEntity<AuthResponse> kakaoLogin(@Valid @RequestBody KakaoLoginRequest request) {
+        AuthResponse response = authService.loginWithKakaoToken(request);
         return ResponseEntity.ok(response);
     }
 
