@@ -1,7 +1,6 @@
 package com.example.runrankback.controller;
 
-import com.example.runrankback.dto.request.UpdatePasswordRequest;
-import com.example.runrankback.dto.request.UpdateUserNameRequest;
+import com.example.runrankback.dto.request.UpdateProfileRequest;
 import com.example.runrankback.dto.response.UserProfileResponse;
 import com.example.runrankback.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -41,6 +40,23 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(summary = "프로필 정보 수정",
+            description = "닉네임, 비밀번호를 수정합니다. 변경하고 싶은 필드만 값을 넣으면 됩니다. (로컬 회원 전용)")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "프로필 수정 성공",
+                    content = @Content(schema = @Schema(implementation = UserProfileResponse.class))),
+            @ApiResponse(responseCode = "400", description = "현재 비밀번호 불일치 또는 카카오 회원"),
+            @ApiResponse(responseCode = "401", description = "인증 실패"),
+            @ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없음")
+    })
+    @PutMapping("/me")
+    public ResponseEntity<UserProfileResponse> updateProfile(
+            @Valid @RequestBody UpdateProfileRequest request) {
+        String email = getCurrentUserEmail();
+        UserProfileResponse response = userService.updateProfile(email, request);
+        return ResponseEntity.ok(response);
+    }
+
     @Operation(summary = "프로필 이미지 업로드/수정",
             description = "프로필 이미지를 업로드하거나 수정합니다. (로컬 회원 전용, 카카오 회원 불가)")
     @ApiResponses({
@@ -72,39 +88,6 @@ public class UserController {
         String email = getCurrentUserEmail();
         UserProfileResponse response = userService.deleteProfileImage(email);
         return ResponseEntity.ok(response);
-    }
-
-    @Operation(summary = "닉네임 수정",
-            description = "닉네임을 수정합니다. (로컬 회원 전용, 카카오 회원 불가)")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "닉네임 수정 성공",
-                    content = @Content(schema = @Schema(implementation = UserProfileResponse.class))),
-            @ApiResponse(responseCode = "400", description = "카카오 회원은 수정 불가"),
-            @ApiResponse(responseCode = "401", description = "인증 실패"),
-            @ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없음")
-    })
-    @PutMapping("/me/username")
-    public ResponseEntity<UserProfileResponse> updateUserName(
-            @Valid @RequestBody UpdateUserNameRequest request) {
-        String email = getCurrentUserEmail();
-        UserProfileResponse response = userService.updateUserName(email, request);
-        return ResponseEntity.ok(response);
-    }
-
-    @Operation(summary = "비밀번호 변경",
-            description = "비밀번호를 변경합니다. (로컬 회원 전용, 카카오 회원 불가)")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "비밀번호 변경 성공"),
-            @ApiResponse(responseCode = "400", description = "현재 비밀번호 불일치 또는 카카오 회원"),
-            @ApiResponse(responseCode = "401", description = "인증 실패"),
-            @ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없음")
-    })
-    @PutMapping("/me/password")
-    public ResponseEntity<String> updatePassword(
-            @Valid @RequestBody UpdatePasswordRequest request) {
-        String email = getCurrentUserEmail();
-        userService.updatePassword(email, request);
-        return ResponseEntity.ok("비밀번호가 성공적으로 변경되었습니다.");
     }
 
     /**

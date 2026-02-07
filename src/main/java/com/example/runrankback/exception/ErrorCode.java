@@ -27,6 +27,10 @@ public enum ErrorCode {
     FILE_UPLOAD_FAILED(500, "PROFILE004", "파일 업로드에 실패했습니다."),
     KAKAO_PROFILE_CANNOT_MODIFY(400, "PROFILE005", "카카오 로그인 사용자는 프로필 이미지를 직접 수정할 수 없습니다. 카카오에서 변경해주세요."),
 
+    // User Update (회원정보 수정 관련)
+    PASSWORD_NOT_MATCH(400, "USER001", "현재 비밀번호가 일치하지 않습니다."),
+    KAKAO_USER_CANNOT_MODIFY(400, "USER002", "카카오 사용자는 회원정보를 수정할 수 없습니다."),
+
     // Server (500: 서버 잘못)
     INTERNAL_SERVER_ERROR(500, "S001", "서버 내부 에러가 발생했습니다.");
 

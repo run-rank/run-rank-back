@@ -1,7 +1,6 @@
 package com.example.runrankback.service;
 
-import com.example.runrankback.dto.request.UpdatePasswordRequest;
-import com.example.runrankback.dto.request.UpdateUserNameRequest;
+import com.example.runrankback.dto.request.UpdateProfileRequest;
 import com.example.runrankback.dto.response.UserProfileResponse;
 import com.example.runrankback.entity.User;
 import com.example.runrankback.exception.CustomException;
@@ -28,9 +27,7 @@ public class UserService {
      * 내 프로필 조회
      */
     public UserProfileResponse getMyProfile(String email) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-
+        User user = findUserByEmail(email);
         return UserProfileResponse.from(user);
     }
 
@@ -39,11 +36,10 @@ public class UserService {
      */
     @Transactional
     public UserProfileResponse updateProfileImage(String email, MultipartFile file) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        User user = findUserByEmail(email);
 
         // 카카오 회원은 프로필 이미지 수정 불가
-        if ("kakao".equals(user.getProvider())) {
+        if (user.isKakaoUser()) {
             throw new CustomException(ErrorCode.KAKAO_PROFILE_CANNOT_MODIFY);
         }
 
@@ -68,11 +64,10 @@ public class UserService {
      */
     @Transactional
     public UserProfileResponse deleteProfileImage(String email) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        User user = findUserByEmail(email);
 
         // 카카오 회원은 프로필 이미지 삭제 불가
-        if ("kakao".equals(user.getProvider())) {
+        if (user.isKakaoUser()) {
             throw new CustomException(ErrorCode.KAKAO_PROFILE_CANNOT_MODIFY);
         }
 
@@ -90,44 +85,50 @@ public class UserService {
     }
 
     /**
-     * 닉네임 수정 (로컬 회원 전용)
+     * 프로필 정보 수정 (닉네임, 비밀번호 통합)
+     * - 로컬 회원 전용
+     * - 변경하고 싶은 필드만 값을 넣으면 해당 필드만 업데이트됨
      */
     @Transactional
-    public UserProfileResponse updateUserName(String email, UpdateUserNameRequest request) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+    public UserProfileResponse updateProfile(String email, UpdateProfileRequest request) {
+        User user = findUserByEmail(email);
 
         // 카카오 사용자는 회원정보 수정 불가
         if (user.isKakaoUser()) {
             throw new CustomException(ErrorCode.KAKAO_USER_CANNOT_MODIFY);
         }
 
-        user.updateUserName(request.getUserName());
-        log.info("닉네임 변경 완료 - userId: {}, newUserName: {}", user.getId(), request.getUserName());
+        // 닉네임 변경 요청이 있는 경우
+        if (request.hasUserNameUpdate()) {
+            user.updateUserName(request.getUserName());
+            log.info("닉네임 변경 완료 - userId: {}, newUserName: {}", user.getId(), request.getUserName());
+        }
+
+        // 비밀번호 변경 요청이 있는 경우
+        if (request.hasPasswordUpdate()) {
+            // 현재 비밀번호 필수 확인
+            if (request.getCurrentPassword() == null || request.getCurrentPassword().isBlank()) {
+                throw new CustomException(ErrorCode.PASSWORD_NOT_MATCH);
+            }
+
+            // 현재 비밀번호 일치 여부 확인
+            if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
+                throw new CustomException(ErrorCode.PASSWORD_NOT_MATCH);
+            }
+
+            // 새 비밀번호로 업데이트
+            user.updatePassword(passwordEncoder.encode(request.getNewPassword()));
+            log.info("비밀번호 변경 완료 - userId: {}", user.getId());
+        }
 
         return UserProfileResponse.from(user);
     }
 
     /**
-     * 비밀번호 변경 (로컬 회원 전용)
+     * 이메일로 사용자 조회
      */
-    @Transactional
-    public void updatePassword(String email, UpdatePasswordRequest request) {
-        User user = userRepository.findByEmail(email)
+    private User findUserByEmail(String email) {
+        return userRepository.findByEmail(email)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-
-        // 카카오 사용자는 비밀번호 변경 불가
-        if (user.isKakaoUser()) {
-            throw new CustomException(ErrorCode.KAKAO_USER_CANNOT_MODIFY);
-        }
-
-        // 현재 비밀번호 확인
-        if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
-            throw new CustomException(ErrorCode.PASSWORD_NOT_MATCH);
-        }
-
-        // 새 비밀번호로 업데이트
-        user.updatePassword(passwordEncoder.encode(request.getNewPassword()));
-        log.info("비밀번호 변경 완료 - userId: {}", user.getId());
     }
 }
