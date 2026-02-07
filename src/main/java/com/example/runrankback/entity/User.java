@@ -44,6 +44,18 @@ public class User {
         this.profileImageUrl = profileImageUrl;
     }
 
+    // 카카오 사용자인지 확인
+    public boolean isKakaoUser() {
+        return "kakao".equals(this.provider);
+    }
 
+    // 닉네임 업데이트
+    public void updateUserName(String userName) {
+        this.userName = userName;
+    }
 
+    // 비밀번호 업데이트
+    public void updatePassword(String password) {
+        this.password = password;
+    }
 }
