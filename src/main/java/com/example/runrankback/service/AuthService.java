@@ -197,4 +197,12 @@ public class AuthService {
                 .userName(user.getUserName())
                 .build();
     }
+
+    /**
+     * 로그아웃 - DB에서 리프레시 토큰 삭제
+     */
+    @Transactional
+    public void logout(String email) {
+        refreshTokenRepository.deleteByUser_Email(email);
+    }
 }
