@@ -1,5 +1,6 @@
 package com.example.runrankback.dto.request;
 
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -20,6 +21,8 @@ public class UpdateProfileRequest {
 
     private String currentPassword;  // 비밀번호 변경 시 필수
 
+    @Pattern(regexp = "^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,20}$",
+            message = "비밀번호는 영문과 숫자를 포함하여 8~20자여야 합니다.")
     @Size(min = 8, max = 20, message = "비밀번호는 8자 이상 20자 이하로 입력해주세요.")
     private String newPassword;
 
