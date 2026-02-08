@@ -45,6 +45,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/api/auth/logout").authenticated()  // 로그아웃은 인증 필요
                         .requestMatchers("/api/auth/**").permitAll()       // 회원가입, 로그인 API 경로 허용
                         .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll()  // OAuth2 로그인 경로 허용
                         .requestMatchers("/h2-console/**").permitAll()     // H2 데이터베이스 콘솔 허용

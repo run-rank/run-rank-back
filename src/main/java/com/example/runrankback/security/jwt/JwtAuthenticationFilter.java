@@ -46,6 +46,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
+        // 로그아웃은 JWT 검사 필요
+        if (path.equals("/api/auth/logout")) {
+            return false;
+        }
         // 로그인, 회원가입, 토큰 갱신 경로는 JWT 검사를 건너뜁니다.
         return path.startsWith("/api/auth/");
     }

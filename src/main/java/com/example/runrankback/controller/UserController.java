@@ -2,6 +2,7 @@ package com.example.runrankback.controller;
 
 import com.example.runrankback.dto.request.UpdateProfileRequest;
 import com.example.runrankback.dto.response.UserProfileResponse;
+import com.example.runrankback.security.CustomUserDetails;
 import com.example.runrankback.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -13,8 +14,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -34,9 +34,9 @@ public class UserController {
             @ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없음")
     })
     @GetMapping("/me")
-    public ResponseEntity<UserProfileResponse> getMyProfile() {
-        String email = getCurrentUserEmail();
-        UserProfileResponse response = userService.getMyProfile(email);
+    public ResponseEntity<UserProfileResponse> getMyProfile(
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        UserProfileResponse response = userService.getMyProfile(userDetails.getUser());
         return ResponseEntity.ok(response);
     }
 
@@ -51,9 +51,9 @@ public class UserController {
     })
     @PutMapping("/me")
     public ResponseEntity<UserProfileResponse> updateProfile(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @Valid @RequestBody UpdateProfileRequest request) {
-        String email = getCurrentUserEmail();
-        UserProfileResponse response = userService.updateProfile(email, request);
+        UserProfileResponse response = userService.updateProfile(userDetails.getUser(), request);
         return ResponseEntity.ok(response);
     }
 
@@ -68,9 +68,9 @@ public class UserController {
     })
     @PutMapping(value = "/me/profile-image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<UserProfileResponse> updateProfileImage(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestPart("file") MultipartFile file) {
-        String email = getCurrentUserEmail();
-        UserProfileResponse response = userService.updateProfileImage(email, file);
+        UserProfileResponse response = userService.updateProfileImage(userDetails.getUser(), file);
         return ResponseEntity.ok(response);
     }
 
@@ -84,17 +84,9 @@ public class UserController {
             @ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없음")
     })
     @DeleteMapping("/me/profile-image")
-    public ResponseEntity<UserProfileResponse> deleteProfileImage() {
-        String email = getCurrentUserEmail();
-        UserProfileResponse response = userService.deleteProfileImage(email);
+    public ResponseEntity<UserProfileResponse> deleteProfileImage(
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        UserProfileResponse response = userService.deleteProfileImage(userDetails.getUser());
         return ResponseEntity.ok(response);
-    }
-
-    /**
-     * SecurityContext에서 현재 로그인한 유저의 이메일을 가져옵니다.
-     */
-    private String getCurrentUserEmail() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return authentication.getName();
     }
 }

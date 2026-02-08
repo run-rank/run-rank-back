@@ -4,6 +4,7 @@ import com.example.runrankback.dto.request.AuthRequest;
 import com.example.runrankback.dto.request.KakaoLoginRequest;
 import com.example.runrankback.dto.request.LoginRequest;
 import com.example.runrankback.dto.response.AuthResponse;
+import com.example.runrankback.security.CustomUserDetails;
 import com.example.runrankback.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -13,8 +14,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -58,10 +58,8 @@ public class AuthController {
 
     @Operation(summary = "로그아웃", description = "로그아웃합니다. 서버에서 리프레시 토큰을 삭제합니다. 프론트에서는 로컬 저장소의 토큰을 삭제해주세요.")
     @PostMapping("/logout")
-    public ResponseEntity<String> logout() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String email = authentication.getName();
-        authService.logout(email);
+    public ResponseEntity<String> logout(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        authService.logout(userDetails.getUser().getEmail());
         return ResponseEntity.ok("로그아웃 성공");
     }
 
