@@ -36,6 +36,9 @@ dependencies {
 
     implementation 'org.hibernate.orm:hibernate-spatial'    // 공간 데이터 라이브러리
 
+    // Google Map
+    implementation 'com.google.maps:google-maps-services:2.1.2'
+
     // lpmbok
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
