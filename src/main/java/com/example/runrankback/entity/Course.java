@@ -15,7 +15,6 @@ import java.util.Map;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "courses")
 public class Course extends BaseTimeEntity {
 
     @Id
