@@ -18,12 +18,20 @@ CREATE TABLE refresh_token (
 
 CREATE TABLE course (
     id BIGSERIAL PRIMARY KEY,
-    user_id BIGINT NOT NULL,                    -- FK
-    title VARCHAR(100) NOT NULL,
-    path GEOMETRY(LineString, 4326) NOT NULL,   -- GPS 경로 Data
-    distance DOUBLE PRECISION NOT NULL,         -- meter
-    duration INTEGER NOT NULL,                  -- seconds
+    user_id BIGINT NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    distance INTEGER NOT NULL,
+    encoded_polyline TEXT NOT NULL,
+    path GEOMETRY(LineString, 4326),
+    start_point GEOMETRY(Point, 4326),
+    start_lat DOUBLE PRECISION NOT NULL,
+    start_lng DOUBLE PRECISION NOT NULL,
+    visibility VARCHAR(20) NOT NULL,
+    route JSONB,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_course_user FOREIGN KEY (user_id)
         REFERENCES users(id) ON DELETE CASCADE
 );
+
+CREATE INDEX idx_course_coords ON course (start_lat, start_lng);

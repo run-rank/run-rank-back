@@ -1,14 +1,20 @@
 package com.example.runrankback.entity;
 
+import io.hypersistence.utils.hibernate.type.json.JsonBinaryType;
+import org.hibernate.annotations.Type;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import org.locationtech.jts.geom.LineString;
+import org.locationtech.jts.geom.Point;
+
+import java.util.List;
+import java.util.Map;
 
 @Entity
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Course extends BaseTimeEntity {
 
     @Id
@@ -19,37 +25,33 @@ public class Course extends BaseTimeEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(nullable = false, length = 100)
-    private String title;
-
-    @Column(columnDefinition = "TEXT")
-    private String description;
-
-    @Column(columnDefinition = "TEXT", nullable = false)
-    private String encodedPath;
-
-    @Column(nullable = false, columnDefinition = "geometry(LineString, 4326)")
-    private org.locationtech.jts.geom.LineString path;
+    @Column(nullable = false)
+    private String name;
 
     @Column(nullable = false)
-    private Double distance;
+    private Integer distance; // 미터 단위
 
-    private Long savedCount = 0L;
+    @Column(columnDefinition = "TEXT", nullable = false)
+    private String encodedPolyline;
 
-    @Column(nullable = false, columnDefinition = "geometry(Point, 4326)")
-    private org.locationtech.jts.geom.Point startPoint;
+    @Column(columnDefinition = "geometry(LineString, 4326)")
+    private LineString path;
 
-    @Builder
-    public Course(User user, String title, String description, String encodedPath,
-                  org.locationtech.jts.geom.LineString path, org.locationtech.jts.geom.Point startPoint,
-                  Double distance) {
-        this.user = user;
-        this.title = title;
-        this.description = description;
-        this.encodedPath = encodedPath;
-        this.path = path;
-        this.startPoint = startPoint;
-        this.distance = distance;
-        this.savedCount = 0L;
+    @Column(columnDefinition = "geometry(Point, 4326)")
+    private Point startPoint;
+
+    private Double startLat;
+    private Double startLng;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Visibility visibility; // PUBLIC, PRIVATE
+
+    @Type(JsonBinaryType.class)
+    @Column(columnDefinition = "jsonb")
+    private List<Map<String, Object>> route;
+
+    public enum Visibility {
+        PUBLIC, PRIVATE
     }
 }
