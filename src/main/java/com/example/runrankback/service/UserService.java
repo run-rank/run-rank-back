@@ -32,38 +32,8 @@ public class UserService {
     }
 
     /**
-     * 프로필 이미지 업로드/수정 (로컬 회원 전용)
-     * @param user CustomUserDetails에서 가져온 User 엔티티
-     */
-    @Transactional
-    public UserProfileResponse updateProfileImage(User user, MultipartFile file) {
-        // 영속성 컨텍스트에 다시 연결 (Detached 상태 해결)
-        User managedUser = userRepository.findById(user.getId())
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-
-        // 카카오 회원은 프로필 이미지 수정 불가
-        if (managedUser.isKakaoUser()) {
-            throw new CustomException(ErrorCode.KAKAO_PROFILE_CANNOT_MODIFY);
-        }
-
-        // 기존 이미지가 있으면 S3에서 삭제
-        if (managedUser.getProfileImageUrl() != null) {
-            s3Service.deleteProfileImage(managedUser.getProfileImageUrl());
-        }
-
-        // 새 이미지 업로드
-        String newImageUrl = s3Service.uploadProfileImage(file, managedUser.getId());
-
-        // DB 업데이트
-        managedUser.updateProfileImage(newImageUrl);
-
-        log.info("프로필 이미지 업데이트 완료 - userId: {}, url: {}", managedUser.getId(), newImageUrl);
-
-        return UserProfileResponse.from(managedUser);
-    }
-
-    /**
      * 프로필 이미지 삭제 (로컬 회원 전용)
+     * - 이미지 삭제 후 null로 설정 (프론트에서 기본 이미지 처리)
      * @param user CustomUserDetails에서 가져온 User 엔티티
      */
     @Transactional
@@ -82,7 +52,7 @@ public class UserService {
             s3Service.deleteProfileImage(managedUser.getProfileImageUrl());
         }
 
-        // DB에서 URL 제거
+        // DB에서 URL 제거 (null로 설정 → 프론트에서 기본 이미지 처리)
         managedUser.updateProfileImage(null);
 
         log.info("프로필 이미지 삭제 완료 - userId: {}", managedUser.getId());
@@ -91,13 +61,15 @@ public class UserService {
     }
 
     /**
-     * 프로필 정보 수정 (닉네임, 비밀번호 통합)
+     * 프로필 정보 수정 (닉네임, 비밀번호, 프로필 이미지 통합)
      * - 로컬 회원 전용
      * - 변경하고 싶은 필드만 값을 넣으면 해당 필드만 업데이트됨
      * @param user CustomUserDetails에서 가져온 User 엔티티
+     * @param request 닉네임, 비밀번호 수정 요청
+     * @param profileImage 프로필 이미지 파일 (null이면 기존 이미지 유지)
      */
     @Transactional
-    public UserProfileResponse updateProfile(User user, UpdateProfileRequest request) {
+    public UserProfileResponse updateProfile(User user, UpdateProfileRequest request, MultipartFile profileImage) {
         // 영속성 컨텍스트에 다시 연결
         User managedUser = userRepository.findById(user.getId())
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
@@ -128,6 +100,19 @@ public class UserService {
             // 새 비밀번호로 업데이트
             managedUser.updatePassword(passwordEncoder.encode(request.getNewPassword()));
             log.info("비밀번호 변경 완료 - userId: {}", managedUser.getId());
+        }
+
+        // 프로필 이미지 변경 요청이 있는 경우
+        if (profileImage != null && !profileImage.isEmpty()) {
+            // 기존 이미지가 있으면 S3에서 삭제
+            if (managedUser.getProfileImageUrl() != null) {
+                s3Service.deleteProfileImage(managedUser.getProfileImageUrl());
+            }
+
+            // 새 이미지 업로드
+            String newImageUrl = s3Service.uploadProfileImage(profileImage, managedUser.getId());
+            managedUser.updateProfileImage(newImageUrl);
+            log.info("프로필 이미지 업데이트 완료 - userId: {}, url: {}", managedUser.getId(), newImageUrl);
         }
 
         return UserProfileResponse.from(managedUser);

@@ -41,36 +41,26 @@ public class UserController {
     }
 
     @Operation(summary = "프로필 정보 수정",
-            description = "닉네임, 비밀번호를 수정합니다. 변경하고 싶은 필드만 값을 넣으면 됩니다. (로컬 회원 전용)")
+            description = "닉네임, 비밀번호, 프로필 이미지를 수정합니다. 변경하고 싶은 필드만 값을 넣으면 됩니다. (로컬 회원 전용)\n\n" +
+                    "- 닉네임: userName 필드에 값 입력\n" +
+                    "- 비밀번호: newPassword + confirmPassword 입력\n" +
+                    "- 프로필 이미지: profileImage 파일 첨부 (없으면 기존 이미지 유지)")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "프로필 수정 성공",
                     content = @Content(schema = @Schema(implementation = UserProfileResponse.class))),
-            @ApiResponse(responseCode = "400", description = "현재 비밀번호 불일치 또는 카카오 회원"),
+            @ApiResponse(responseCode = "400", description = "비밀번호 불일치 또는 카카오 회원"),
             @ApiResponse(responseCode = "401", description = "인증 실패"),
             @ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없음")
     })
-    @PutMapping("/me")
+    @PutMapping(value = "/me", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<UserProfileResponse> updateProfile(
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @Valid @RequestBody UpdateProfileRequest request) {
-        UserProfileResponse response = userService.updateProfile(userDetails.getUser(), request);
-        return ResponseEntity.ok(response);
-    }
-
-    @Operation(summary = "프로필 이미지 업로드/수정",
-            description = "프로필 이미지를 업로드하거나 수정합니다. (로컬 회원 전용, 카카오 회원 불가)")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "프로필 이미지 업로드 성공",
-                    content = @Content(schema = @Schema(implementation = UserProfileResponse.class))),
-            @ApiResponse(responseCode = "400", description = "잘못된 파일 형식 또는 카카오 회원"),
-            @ApiResponse(responseCode = "401", description = "인증 실패"),
-            @ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없음")
-    })
-    @PutMapping(value = "/me/profile-image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<UserProfileResponse> updateProfileImage(
-            @AuthenticationPrincipal CustomUserDetails userDetails,
-            @RequestPart("file") MultipartFile file) {
-        UserProfileResponse response = userService.updateProfileImage(userDetails.getUser(), file);
+            @RequestParam(value = "userName", required = false) String userName,
+            @RequestParam(value = "newPassword", required = false) String newPassword,
+            @RequestParam(value = "confirmPassword", required = false) String confirmPassword,
+            @RequestPart(value = "profileImage", required = false) MultipartFile profileImage) {
+        UpdateProfileRequest request = new UpdateProfileRequest(userName, newPassword, confirmPassword);
+        UserProfileResponse response = userService.updateProfile(userDetails.getUser(), request, profileImage);
         return ResponseEntity.ok(response);
     }
 
