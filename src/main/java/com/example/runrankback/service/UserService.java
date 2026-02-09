@@ -115,13 +115,13 @@ public class UserService {
 
         // 비밀번호 변경 요청이 있는 경우
         if (request.hasPasswordUpdate()) {
-            // 현재 비밀번호 필수 확인
-            if (request.getCurrentPassword() == null || request.getCurrentPassword().isBlank()) {
-                throw new CustomException(ErrorCode.PASSWORD_NOT_MATCH);
+            // 비밀번호 확인 필수 체크
+            if (request.getConfirmPassword() == null || request.getConfirmPassword().isBlank()) {
+                throw new CustomException(ErrorCode.PASSWORD_CONFIRM_REQUIRED);
             }
 
-            // 현재 비밀번호 일치 여부 확인
-            if (!passwordEncoder.matches(request.getCurrentPassword(), managedUser.getPassword())) {
+            // 새 비밀번호와 비밀번호 확인 일치 여부 확인
+            if (!request.getNewPassword().equals(request.getConfirmPassword())) {
                 throw new CustomException(ErrorCode.PASSWORD_NOT_MATCH);
             }
 

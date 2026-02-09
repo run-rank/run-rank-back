@@ -28,8 +28,9 @@ public enum ErrorCode {
     KAKAO_PROFILE_CANNOT_MODIFY(400, "PROFILE005", "카카오 로그인 사용자는 프로필 이미지를 직접 수정할 수 없습니다. 카카오에서 변경해주세요."),
 
     // User Update (회원정보 수정 관련)
-    PASSWORD_NOT_MATCH(400, "USER001", "현재 비밀번호가 일치하지 않습니다."),
+    PASSWORD_NOT_MATCH(400, "USER001", "비밀번호와 비밀번호 확인이 일치하지 않습니다."),
     KAKAO_USER_CANNOT_MODIFY(400, "USER002", "카카오 사용자는 회원정보를 수정할 수 없습니다."),
+    PASSWORD_CONFIRM_REQUIRED(400, "USER003", "비밀번호 확인을 입력해주세요."),
 
     // Server (500: 서버 잘못)
     INTERNAL_SERVER_ERROR(500, "S001", "서버 내부 에러가 발생했습니다.");
