@@ -1,8 +1,10 @@
 package com.example.runrankback.controller;
 
 import com.example.runrankback.dto.request.AuthRequest;
+import com.example.runrankback.dto.request.KakaoLoginRequest;
 import com.example.runrankback.dto.request.LoginRequest;
 import com.example.runrankback.dto.response.AuthResponse;
+import com.example.runrankback.security.CustomUserDetails;
 import com.example.runrankback.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -12,6 +14,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -44,6 +47,20 @@ public class AuthController {
     public ResponseEntity<AuthResponse> refresh(@RequestBody RefreshTokenRequest request){
         AuthResponse response = authService.refresh(request.getRefreshToken());
         return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "카카오 로그인", description = "카카오 액세스 토큰으로 로그인합니다. 신규 사용자는 자동 회원가입됩니다.")
+    @PostMapping("/kakao")
+    public ResponseEntity<AuthResponse> kakaoLogin(@Valid @RequestBody KakaoLoginRequest request) {
+        AuthResponse response = authService.loginWithKakaoToken(request);
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "로그아웃", description = "로그아웃합니다. 서버에서 리프레시 토큰을 삭제합니다. 프론트에서는 로컬 저장소의 토큰을 삭제해주세요.")
+    @PostMapping("/logout")
+    public ResponseEntity<String> logout(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        authService.logout(userDetails.getUser().getEmail());
+        return ResponseEntity.ok("로그아웃 성공");
     }
 
     @Getter
