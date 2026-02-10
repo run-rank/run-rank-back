@@ -46,4 +46,12 @@ public class CourseController {
 
         return ResponseEntity.ok(courses);
     }
+
+    @Operation(summary = "코스 단일 조회", description = "코스 ID로 특정 코스의 상세 정보를 조회합니다.")
+    @GetMapping("/{courseId}")
+    public ResponseEntity<CourseResponseDto> getCourseDetail(@PathVariable Long courseId) {
+        CourseResponseDto response = courseService.getCourseDetail(courseId);
+
+        return ResponseEntity.ok(response);
+    }
 }

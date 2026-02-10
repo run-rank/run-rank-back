@@ -67,4 +67,20 @@ public class CourseService {
                         .build())
                 .collect(Collectors.toList());
     }
+
+    @Transactional(readOnly = true)
+    public CourseResponseDto getCourseDetail(Long courseId) {
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 코스가 존재하지 않습니다."));
+
+        return CourseResponseDto.builder()
+                .id(course.getId())
+                .name(course.getName())
+                .distance(course.getDistance())
+                .encodedPolyline(course.getEncodedPolyline())
+                .startLat(course.getStartLat())
+                .startLng(course.getStartLng())
+                .route(course.getRoute())
+                .build();
+    }
 }
