@@ -48,5 +48,6 @@ CREATE TABLE running_record (
     distance INTEGER NOT NULL,      -- 미터 단위
     run_date DATE NOT NULL,
     gps_route JSONB,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
