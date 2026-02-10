@@ -7,6 +7,6 @@ import java.util.List;
 
 public interface CourseRepository extends JpaRepository<Course, Long> {
     List<Course> findByStartLatBetweenAndStartLngBetween(
-            Double minLat, Double maxLat, Double minLag, Double maxLag
+            Double minLat, Double maxLat, Double minLng, Double maxLng
     );
 }
