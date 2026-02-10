@@ -16,6 +16,6 @@ public class CourseResponseDto {
     private Integer distance;
     private String encodedPolyline;
     private Double startLat;
-    private Double startLag;
+    private Double startLng;
     private List<Map<String, Object>> route;
 }
