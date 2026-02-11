@@ -35,3 +35,19 @@ CREATE TABLE course (
 );
 
 CREATE INDEX idx_course_coords ON course (start_lat, start_lng);
+
+CREATE TABLE running_record (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    CONSTRAINT fk_record_user FOREIGN KEY (user_id)
+        REFERENCES users(id) ON DELETE CASCADE,
+    course_id BIGINT NOT NULL,
+    CONSTRAINT fk_record_course FOREIGN KEY (course_id)
+        REFERENCES course(id) ON DELETE CASCADE,
+    duration INTEGER NOT NULL,      -- 초 단위
+    distance INTEGER NOT NULL,      -- 미터 단위
+    run_date DATE NOT NULL,
+    gps_route JSONB,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

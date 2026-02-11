@@ -17,7 +17,7 @@ import java.util.Map;
 
 @Tag(name = "Course API", description = "러닝 코스 관리 API")
 @RestController
-@RequestMapping("/courses")
+@RequestMapping("/api/courses")
 @RequiredArgsConstructor
 public class CourseController {
 

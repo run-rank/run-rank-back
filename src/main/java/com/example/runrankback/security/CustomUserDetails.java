@@ -24,6 +24,10 @@ public class CustomUserDetails implements UserDetails, OAuth2User {
         this.attributes = attributes;
     }
 
+    public Long getUserId() {
+        return user.getId();
+    }
+
     // 권한 관련 (필요시 수정)
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

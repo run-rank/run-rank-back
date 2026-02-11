@@ -1,8 +1,6 @@
 package com.example.runrankback.security.jwt;
 
 import com.example.runrankback.entity.User;
-import com.example.runrankback.exception.CustomException;
-import com.example.runrankback.exception.ErrorCode;
 import com.example.runrankback.repository.UserRepository;
 import com.example.runrankback.security.CustomUserDetails;
 import io.jsonwebtoken.*;
@@ -17,7 +15,6 @@ import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
 import java.util.Date;
 
 @Slf4j
@@ -29,6 +26,8 @@ public class JwtProvider {
 
     @Value("${jwt.secret}")
     private String salt;
+
+    private final UserRepository userRepository;
 
     private SecretKey secretKey;
     private static final long ACCESS_EXP = 1000L * 60 * 60 * 24; // 24시간
@@ -71,13 +70,12 @@ public class JwtProvider {
     public Authentication getAuthentication(String token) {
         String email = getEmail(token);
 
-        // DB에서 사용자 조회하여 CustomUserDetails 생성
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+                .orElseThrow(() -> new RuntimeException("해당 유저를 찾을 수 없습니다: " + email));
 
         CustomUserDetails userDetails = new CustomUserDetails(user);
 
-        return new UsernamePasswordAuthenticationToken(userDetails, "", Collections.emptyList());
+        return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
     }
 
     // 토큰에서 이메일 추출
