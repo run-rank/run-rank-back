@@ -22,13 +22,15 @@ import java.util.Date;
 @RequiredArgsConstructor
 public class JwtProvider {
 
+    private final UserRepository userRepository;
+
     @Value("${jwt.secret}")
     private String salt;
 
     private final UserRepository userRepository;
 
     private SecretKey secretKey;
-    private static final long ACCESS_EXP = 1000L * 60 * 60 * 24; // 24시간 1000L * 60 * 60 * 24;
+    private static final long ACCESS_EXP = 1000L * 60 * 60 * 24; // 24시간
     private static final long REFRESH_EXP = 1000L * 60 * 60 * 24 * 7; // 7일
 
     @PostConstruct
@@ -56,12 +58,15 @@ public class JwtProvider {
         return Jwts.builder()
                 .claims(claims)
                 .issuedAt(now)
-                .expiration(new Date(now.getTime() + REFRESH_EXP)) // 리프레시 상수 적용
+                .expiration(new Date(now.getTime() + REFRESH_EXP))
                 .signWith(secretKey)
                 .compact();
     }
 
-    // 토큰에서 인증 정보 조회
+    /**
+     * 토큰에서 인증 정보 조회 - CustomUserDetails 사용
+     * 로컬 사용자, 카카오 사용자 모두 동일하게 처리됨 (JWT 기반)
+     */
     public Authentication getAuthentication(String token) {
         String email = getEmail(token);
 
