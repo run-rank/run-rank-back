@@ -1,27 +1,31 @@
 package com.example.runrankback.security.jwt;
 
+import com.example.runrankback.entity.User;
+import com.example.runrankback.repository.UserRepository;
+import com.example.runrankback.security.CustomUserDetails;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
 import java.util.Date;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class JwtProvider {
 
     @Value("${jwt.secret}")
     private String salt;
+
+    private final UserRepository userRepository;
 
     private SecretKey secretKey;
     private static final long ACCESS_EXP = 1000L * 60 * 60 * 24; // 24시간 1000L * 60 * 60 * 24;
@@ -60,10 +64,12 @@ public class JwtProvider {
     // 토큰에서 인증 정보 조회
     public Authentication getAuthentication(String token) {
         String email = getEmail(token);
-        UserDetails userDetails = User.withUsername(email)
-                .password("")
-                .authorities(Collections.emptyList())
-                .build();
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("해당 유저를 찾을 수 없습니다: " + email));
+
+        CustomUserDetails userDetails = new CustomUserDetails(user);
+
         return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
     }
 
