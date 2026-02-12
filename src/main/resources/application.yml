@@ -31,7 +31,7 @@ spring:
   jpa:
     # DB 구조는 Flyway로 관리. JPA는 검증만 하도록 설정 변경
     hibernate:
-      ddl-auto: validate
+      ddl-auto: update    # 추후 validate로 변경
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
