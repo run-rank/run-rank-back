@@ -1,6 +1,7 @@
 package com.example.runrankback.controller;
 
 import com.example.runrankback.dto.request.RecordRequestDto;
+import com.example.runrankback.dto.response.RecordResponseDto;
 import com.example.runrankback.security.CustomUserDetails;
 import com.example.runrankback.service.RunningRecordService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -10,12 +11,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -42,5 +41,13 @@ public class RunningRecordController {
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(Collections.singletonMap("recordId", recordId));
+    }
+
+    @Operation(summary = "러닝 기록 조회", description = "로그인한 사용자의 러닝 기록 목록을 조회합니다.")
+    @GetMapping
+    public ResponseEntity<List<RecordResponseDto>> getMyRecords(
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        return ResponseEntity.ok(recordService.getMyRecords(userDetails.getUserId()));
     }
 }
