@@ -1,6 +1,7 @@
 package com.example.runrankback.service;
 
 import com.example.runrankback.dto.request.RecordRequestDto;
+import com.example.runrankback.dto.response.RecordResponseDto;
 import com.example.runrankback.entity.Course;
 import com.example.runrankback.entity.RunningRecord;
 import com.example.runrankback.entity.User;
@@ -10,6 +11,8 @@ import com.example.runrankback.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -37,5 +40,14 @@ public class RunningRecordService {
                 .build();
 
         return recordRepository.save(record).getId();
+    }
+
+    @Transactional(readOnly = true)
+    public List<RecordResponseDto> getMyRecords(Long userId) {
+        List<RunningRecord> records = recordRepository.findByUserIdOrderByRunDateDesc(userId);
+
+        return records.stream()
+                .map(RecordResponseDto::fromEntity)
+                .toList();
     }
 }

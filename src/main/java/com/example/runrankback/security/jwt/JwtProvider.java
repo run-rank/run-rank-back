@@ -27,8 +27,6 @@ public class JwtProvider {
     @Value("${jwt.secret}")
     private String salt;
 
-    private final UserRepository userRepository;
-
     private SecretKey secretKey;
     private static final long ACCESS_EXP = 1000L * 60 * 60 * 24; // 24시간
     private static final long REFRESH_EXP = 1000L * 60 * 60 * 24 * 7; // 7일
