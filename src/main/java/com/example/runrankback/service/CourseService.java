@@ -5,6 +5,7 @@ import com.example.runrankback.dto.response.CourseResponseDto;
 import com.example.runrankback.entity.Course;
 import com.example.runrankback.entity.User;
 import com.example.runrankback.repository.CourseRepository;
+import com.example.runrankback.repository.RunningRecordRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.locationtech.jts.geom.Coordinate;
@@ -25,6 +26,7 @@ public class CourseService {
 
     private final CourseRepository courseRepository;
     private final GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
+    private final RunningRecordRepository runningRecordRepository;
 
     public List<CourseResponseDto> getNearbyCourses(double lat, double lng, double radius) {
         return courseRepository.findNearbyCourses(lat, lng, radius)
@@ -71,10 +73,16 @@ public class CourseService {
         }
     }
 
-    public CourseResponseDto getCourseDetail(Long courseId) {
+    public CourseResponseDto getCourseDetail(Long courseId, Long userId) {
         Course course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new EntityNotFoundException("코스를 찾을 수 없습니다."));
 
-        return CourseResponseDto.from(course);
+        Integer myBestDuration = null;
+        if(userId != null) {
+            myBestDuration = runningRecordRepository.findBestDurationByCourseAndUser(courseId, userId)
+                    .orElse(null);
+        }
+
+        return CourseResponseDto.from(course, myBestDuration);
     }
 }
