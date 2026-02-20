@@ -5,7 +5,6 @@ import org.hibernate.annotations.Type;
 import jakarta.persistence.*;
 import lombok.*;
 import org.locationtech.jts.geom.LineString;
-import org.locationtech.jts.geom.Point;
 
 import java.util.List;
 import java.util.Map;
@@ -28,6 +27,8 @@ public class Course extends BaseTimeEntity {
     @Column(nullable = false)
     private String name;
 
+    private String description;
+
     @Column(nullable = false)
     private Integer distance; // 미터 단위
 
@@ -37,12 +38,6 @@ public class Course extends BaseTimeEntity {
     @Column(columnDefinition = "geometry(LineString, 4326)")
     private LineString path;
 
-    @Column(columnDefinition = "geometry(Point, 4326)")
-    private Point startPoint;
-
-    private Double startLat;
-    private Double startLng;
-
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Visibility visibility; // PUBLIC, PRIVATE
@@ -51,7 +46,14 @@ public class Course extends BaseTimeEntity {
     @Column(columnDefinition = "jsonb")
     private List<Map<String, Object>> route;
 
+    @Builder.Default
+    private Long savedCount = 0L;
+
     public enum Visibility {
         PUBLIC, PRIVATE
+    }
+
+    public void incrementSavedCnt() {
+        this.savedCount++;
     }
 }
