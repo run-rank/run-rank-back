@@ -6,8 +6,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @Service
 @RequiredArgsConstructor
@@ -16,19 +17,20 @@ public class RankingService {
     private final RunningRecordRepository recordRepository;
 
     public RankingResponseDto getCourseRankings(Long courseId) {
-        List<Object[]> results = recordRepository.findBestRecordsByCourse(courseId);
+        List<RunningRecordRepository.RankingItem> results = recordRepository.findBestRecordsByCourse(courseId);
 
-        List<RankingResponseDto.UserRankingDto> rankings = new ArrayList<>();
-        int currentRank = 1;
-
-        for (Object[] row : results) {
-            rankings.add(RankingResponseDto.UserRankingDto.builder()
-                    .rank(currentRank++)
-                    .userId(((Number) row[0]).longValue())
-                    .nickname((String) row[1])
-                    .bestDuration(((Number) row[2]).intValue())
-                    .build());
-        }
+        List<RankingResponseDto.UserRankingDto> rankings = IntStream.range(0, results.size())
+                .mapToObj(i -> {
+                    RunningRecordRepository.RankingItem item = results.get(i);
+                    return RankingResponseDto.UserRankingDto.builder()
+                            .rank(i + 1)
+                            .userId(item.getUserId())
+                            .nickname(item.getNickname())
+                            .profileImageUrl(item.getProfileImageUrl())
+                            .bestDuration(item.getBestDuration())
+                            .build();
+                })
+                .collect(Collectors.toList());
 
         return RankingResponseDto.builder()
                 .courseId(courseId)
