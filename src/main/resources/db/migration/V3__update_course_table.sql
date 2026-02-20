@@ -1,19 +1,19 @@
--- Course 테이블에 누락된 컬럼 추가
-
--- updated_at 컬럼 추가 (BaseTimeEntity 상속으로 인해 필요)
-ALTER TABLE course ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP;
-
--- description 컬럼 추가
-ALTER TABLE course ADD COLUMN IF NOT EXISTS description TEXT;
-
--- encodedPath 컬럼 추가
-ALTER TABLE course ADD COLUMN IF NOT EXISTS encoded_path TEXT;
-
--- savedCount 컬럼 추가
-ALTER TABLE course ADD COLUMN IF NOT EXISTS saved_count BIGINT DEFAULT 0;
-
--- startPoint 컬럼 추가
-ALTER TABLE course ADD COLUMN IF NOT EXISTS start_point GEOMETRY(Point, 4326);
-
--- 기존 duration 컬럼 삭제 (엔티티에서 제거된 것으로 보임)
-ALTER TABLE course DROP COLUMN IF EXISTS duration;
+-- -- Course 테이블에 누락된 컬럼 추가
+--
+-- -- updated_at 컬럼 추가 (BaseTimeEntity 상속으로 인해 필요)
+-- ALTER TABLE course ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP;
+--
+-- -- description 컬럼 추가
+-- ALTER TABLE course ADD COLUMN IF NOT EXISTS description TEXT;
+--
+-- -- encodedPath 컬럼 추가
+-- ALTER TABLE course ADD COLUMN IF NOT EXISTS encoded_path TEXT;
+--
+-- -- savedCount 컬럼 추가
+-- ALTER TABLE course ADD COLUMN IF NOT EXISTS saved_count BIGINT DEFAULT 0;
+--
+-- -- startPoint 컬럼 추가
+-- ALTER TABLE course ADD COLUMN IF NOT EXISTS start_point GEOMETRY(Point, 4326);
+--
+-- -- 기존 duration 컬럼 삭제 (엔티티에서 제거된 것으로 보임)
+-- ALTER TABLE course DROP COLUMN IF EXISTS duration;
