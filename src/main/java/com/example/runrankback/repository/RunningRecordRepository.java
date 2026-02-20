@@ -10,11 +10,19 @@ import java.util.List;
 public interface RunningRecordRepository extends JpaRepository<RunningRecord, Long> {
     List<RunningRecord> findByUserIdOrderByRunDateDesc(Long userId);
 
-    @Query(value = "SELECT r.user_id, u.user_name, MIN(r.duration) as min_duration " +
+    @Query(value = "SELECT u.id as userId, u.user_name as nickname, " +
+            "u.profile_image_url as profileImageUrl, MIN(r.duration) as bestDuration " +
             "FROM running_record r " +
             "JOIN users u ON r.user_id = u.id " +
             "WHERE r.course_id = :courseId " +
-            "GROUP BY r.user_id, u.user_name " +
-            "ORDER BY min_duration ASC", nativeQuery = true)
-    List<Object[]> findBestRecordsByCourse(@Param("courseId") Long courseId);
+            "GROUP BY u.id, u.user_name, u.profile_image_url " +
+            "ORDER BY bestDuration ASC", nativeQuery = true)
+    List<RankingItem> findBestRecordsByCourse(@Param("courseId") Long courseId);
+
+    interface RankingItem {
+        Long getUserId();
+        String getNickname();
+        String getProfileImageUrl();
+        Integer getBestDuration();
+    }
 }
