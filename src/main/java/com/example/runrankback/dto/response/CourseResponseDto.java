@@ -11,6 +11,7 @@ import lombok.Getter;
 public class CourseResponseDto {
     private Long id;
     private String name;
+    private String description;
     private Integer distance;
     private String encodedPolyline;
 
@@ -18,6 +19,8 @@ public class CourseResponseDto {
         return CourseResponseDto.builder()
                 .id(course.getId())
                 .name(course.getName())
+                .description(course.getDescription())
+                .distance(course.getDistance())
                 .encodedPolyline(course.getEncodedPolyline())
                 .build();
     }
