@@ -47,7 +47,8 @@ public class CourseService {
                 .encodedPolyline(requestDto.getEncodedPolyline())
                 .path(path)
                 .route(requestDto.getRoute())
-                .visibility(Course.Visibility.valueOf(requestDto.getVisibility().name()))
+                .visibility(requestDto.getVisibility())
+                .thumbnailUrl(requestDto.getThumbnailUrl())
                 .build();
 
         return courseRepository.save(course).getId();
