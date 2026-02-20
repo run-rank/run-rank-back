@@ -57,8 +57,12 @@ public class CourseController {
 
     @Operation(summary = "코스 상세 조회", description = "코스 ID로 코스 상세 정보를 조회합니다.")
     @GetMapping("/{courseId}")
-    public ResponseEntity<CourseResponseDto> getCourseDetail(@PathVariable Long courseId) {
-        CourseResponseDto response = courseService.getCourseDetail(courseId);
+    public ResponseEntity<CourseResponseDto> getCourseDetail(
+            @PathVariable Long courseId,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        Long userId = (userDetails != null) ? userDetails.getUser().getId() : null;
+        CourseResponseDto response = courseService.getCourseDetail(courseId, userId);
 
         return ResponseEntity.ok(response);
     }
