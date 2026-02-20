@@ -27,4 +27,8 @@ public class CourseResponseDto {
                 .myBestDuration(myBestDuration)
                 .build();
     }
+
+    public static CourseResponseDto from(Course course) {
+        return from(course, null);
+    }
 }
