@@ -8,6 +8,8 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface CourseRepository extends JpaRepository<Course, Long> {
+    List<Course> findAllByOrderByCreatedAtDesc();
+
     @Query(value = "SELECT * FROM course c " +
             "WHERE ST_DWithin(c.path::geography, ST_SetSRID(ST_MakePoint(:lng, :lat), 4326)::geography, :radius) " +
             "ORDER BY c.path::geography <-> ST_SetSRID(ST_MakePoint(:lng, :lat), 4326)::geography " +

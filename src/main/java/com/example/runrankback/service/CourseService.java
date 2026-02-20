@@ -74,6 +74,15 @@ public class CourseService {
         }
     }
 
+    @Transactional(readOnly = true)
+    public List<CourseResponseDto> getAllCourses() {
+        List<Course> courses = courseRepository.findAllByOrderByCreatedAtDesc();
+
+        return courses.stream()
+                .map(CourseResponseDto::from)
+                .collect(Collectors.toList());
+    }
+
     public CourseResponseDto getCourseDetail(Long courseId, Long userId) {
         Course course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new EntityNotFoundException("코스를 찾을 수 없습니다."));

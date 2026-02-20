@@ -66,4 +66,11 @@ public class CourseController {
 
         return ResponseEntity.ok(response);
     }
+
+    @Operation(summary = "전체 코스 조회", description = "생성된 모든 코스를 최신순으로 조회합니다.")
+    @GetMapping
+    public ResponseEntity<List<CourseResponseDto>> getAllCourses() {
+        List<CourseResponseDto> responses = courseService.getAllCourses();
+        return ResponseEntity.ok(responses);
+    }
 }
