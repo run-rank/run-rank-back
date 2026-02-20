@@ -1,11 +1,9 @@
 package com.example.runrankback.dto.response;
 
+import com.example.runrankback.entity.Course;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-
-import java.util.List;
-import java.util.Map;
 
 @Getter
 @AllArgsConstructor
@@ -13,9 +11,26 @@ import java.util.Map;
 public class CourseResponseDto {
     private Long id;
     private String name;
+    private String description;
     private Integer distance;
     private String encodedPolyline;
-    private Double startLat;
-    private Double startLng;
-    private List<Map<String, Object>> route;
+    private String thumbnailUrl;
+
+    private Integer myBestDuration;
+
+    public static CourseResponseDto from(Course course, Integer myBestDuration) {
+        return CourseResponseDto.builder()
+                .id(course.getId())
+                .name(course.getName())
+                .description(course.getDescription())
+                .distance(course.getDistance())
+                .encodedPolyline(course.getEncodedPolyline())
+                .thumbnailUrl(course.getThumbnailUrl())
+                .myBestDuration(myBestDuration)
+                .build();
+    }
+
+    public static CourseResponseDto from(Course course) {
+        return from(course, null);
+    }
 }

@@ -21,6 +21,7 @@ public class RankingResponseDto {
         private Integer rank;
         private Long userId;
         private String nickname;
+        private String profileImageUrl;
         private Integer bestDuration;
     }
 }

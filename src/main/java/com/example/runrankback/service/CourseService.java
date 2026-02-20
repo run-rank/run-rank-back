@@ -5,14 +5,18 @@ import com.example.runrankback.dto.response.CourseResponseDto;
 import com.example.runrankback.entity.Course;
 import com.example.runrankback.entity.User;
 import com.example.runrankback.repository.CourseRepository;
-import com.example.runrankback.repository.UserRepository;
+import com.example.runrankback.repository.RunningRecordRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.LineString;
+import org.locationtech.jts.geom.PrecisionModel;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -21,66 +25,74 @@ import java.util.stream.Collectors;
 public class CourseService {
 
     private final CourseRepository courseRepository;
-    private final UserRepository userRepository;
+    private final GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
+    private final RunningRecordRepository runningRecordRepository;
+
+    public List<CourseResponseDto> getNearbyCourses(double lat, double lng, double radius) {
+        return courseRepository.findNearbyCourses(lat, lng, radius)
+                .stream()
+                .map(CourseResponseDto::from)
+                .collect(Collectors.toList());
+    }
 
     @Transactional
-    public Long createCourse(CourseRequestDto dto) {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("인증된 사용자를 찾을 수 없습니다: " + email));
+    public Long createCourse(CourseRequestDto requestDto, User user) {
+        LineString path = createLineStrFromRoute(requestDto.getRoute());
 
         Course course = Course.builder()
                 .user(user)
-                .name(dto.getName())
-                .distance(dto.getDistance())
-                .encodedPolyline(dto.getEncodedPolyline())
-                .startLat(dto.getStartLat())
-                .startLng(dto.getStartLng())
-                .visibility(dto.getVisibility()) // PUBLIC, PRIVATE
-                .route(dto.getRoute()) // JSONB 백업 데이터
+                .name(requestDto.getName())
+                .description(requestDto.getDescription())
+                .distance(requestDto.getDistance())
+                .encodedPolyline(requestDto.getEncodedPolyline())
+                .path(path)
+                .route(requestDto.getRoute())
+                .visibility(requestDto.getVisibility())
+                .thumbnailUrl(requestDto.getThumbnailUrl())
                 .build();
 
         return courseRepository.save(course).getId();
     }
 
-    // 특정 범위 내의 코스 검색
-    @Transactional(readOnly = true)
-    public List<CourseResponseDto> getCoursesNearby(
-            Double lat, Double lng, Double range
-    ) {
-        Double delta = range * 0.01;    // (0.01 = 약 1.1km)
+    private LineString createLineStrFromRoute(List<Map<String, Object>> route) {
+        if(route == null || route.isEmpty()) {
+            throw new IllegalArgumentException("코스 경로 데이터가 없습니다.");
+        }
 
-        List<Course> courses = courseRepository.findByStartLatBetweenAndStartLngBetween(
-                lat - delta, lat + delta, lng - delta, lng + delta
-        );
+        try{
+            Coordinate[] coordinates = route.stream()
+                    .map(point -> new Coordinate(
+                            Double.parseDouble(point.get("lng").toString()),
+                            Double.parseDouble(point.get("lat").toString())
+                    ))
+                    .toArray(Coordinate[]::new);
 
-        return courses.stream()
-                .map(course -> CourseResponseDto.builder()
-                        .id(course.getId())
-                        .name(course.getName())
-                        .distance(course.getDistance())
-                        .encodedPolyline(course.getEncodedPolyline())
-                        .startLat(course.getStartLat())
-                        .startLng(course.getStartLng())
-                        .route(course.getRoute())
-                        .build())
-                .collect(Collectors.toList());
+            return geometryFactory.createLineString(coordinates);
+        }
+        catch(Exception e) {
+            throw new IllegalArgumentException("올바르지 않은 경로 데이터 형식: " + e.getMessage());
+        }
     }
 
     @Transactional(readOnly = true)
-    public CourseResponseDto getCourseDetail(Long courseId) {
-        Course course = courseRepository.findById(courseId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 코스가 존재하지 않습니다."));
+    public List<CourseResponseDto> getAllCourses() {
+        List<Course> courses = courseRepository.findAllByOrderByCreatedAtDesc();
 
-        return CourseResponseDto.builder()
-                .id(course.getId())
-                .name(course.getName())
-                .distance(course.getDistance())
-                .encodedPolyline(course.getEncodedPolyline())
-                .startLat(course.getStartLat())
-                .startLng(course.getStartLng())
-                .route(course.getRoute())
-                .build();
+        return courses.stream()
+                .map(CourseResponseDto::from)
+                .collect(Collectors.toList());
+    }
+
+    public CourseResponseDto getCourseDetail(Long courseId, Long userId) {
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new EntityNotFoundException("코스를 찾을 수 없습니다."));
+
+        Integer myBestDuration = null;
+        if(userId != null) {
+            myBestDuration = runningRecordRepository.findBestDurationByCourseAndUser(courseId, userId)
+                    .orElse(null);
+        }
+
+        return CourseResponseDto.from(course, myBestDuration);
     }
 }
