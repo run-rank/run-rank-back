@@ -14,6 +14,7 @@ public class CourseResponseDto {
     private String description;
     private Integer distance;
     private String encodedPolyline;
+    private String thumbnailUrl;
 
     private Integer myBestDuration;
 
@@ -24,6 +25,7 @@ public class CourseResponseDto {
                 .description(course.getDescription())
                 .distance(course.getDistance())
                 .encodedPolyline(course.getEncodedPolyline())
+                .thumbnailUrl(course.getThumbnailUrl())
                 .myBestDuration(myBestDuration)
                 .build();
     }
