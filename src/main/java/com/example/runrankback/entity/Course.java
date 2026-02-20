@@ -49,6 +49,8 @@ public class Course extends BaseTimeEntity {
     @Builder.Default
     private Long savedCount = 0L;
 
+    private String thumbnailUrl;
+
     public enum Visibility {
         PUBLIC, PRIVATE
     }
