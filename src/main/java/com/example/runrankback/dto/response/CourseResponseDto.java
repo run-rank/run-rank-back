@@ -15,13 +15,16 @@ public class CourseResponseDto {
     private Integer distance;
     private String encodedPolyline;
 
-    public static CourseResponseDto from(Course course) {
+    private Integer myBestDuration;
+
+    public static CourseResponseDto from(Course course, Integer myBestDuration) {
         return CourseResponseDto.builder()
                 .id(course.getId())
                 .name(course.getName())
                 .description(course.getDescription())
                 .distance(course.getDistance())
                 .encodedPolyline(course.getEncodedPolyline())
+                .myBestDuration(myBestDuration)
                 .build();
     }
 }
