@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface RunningRecordRepository extends JpaRepository<RunningRecord, Long> {
     List<RunningRecord> findByUserIdOrderByRunDateDesc(Long userId);
@@ -18,6 +19,11 @@ public interface RunningRecordRepository extends JpaRepository<RunningRecord, Lo
             "GROUP BY u.id, u.user_name, u.profile_image_url " +
             "ORDER BY bestDuration ASC", nativeQuery = true)
     List<RankingItem> findBestRecordsByCourse(@Param("courseId") Long courseId);
+
+    @Query("SELECT MIN(r.duration) FROM RunningRecord r " +
+            "WHERE r.course.id = :courseId AND r.user.id = :userId")
+    Optional<Integer> findBestDurationByCourseAndUser(
+            @Param("courseId") Long courseId, @Param("userId") Long userId);
 
     interface RankingItem {
         Long getUserId();
