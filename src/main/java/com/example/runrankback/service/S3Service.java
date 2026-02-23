@@ -52,43 +52,53 @@ public class S3Service {
         String extension = getExtension(originalFilename);
         String fileName = "profiles/" + userId + "/" + UUID.randomUUID() + "." + extension;
 
+        return uploadToS3(file, fileName);
+    }
+
+    // 코스 썸네일 업로드
+    public String uploadCourseThumbnail(MultipartFile file, Long userId) {
+        validateFile(file);
+
+        String fileName = "courses/" + userId + "/" +
+                UUID.randomUUID() + "." + getExtension(file.getOriginalFilename());
+
+        return uploadToS3(file, fileName);
+    }
+
+    // S3 업로드
+    private String uploadToS3(MultipartFile file, String fileName) {
         try {
-            // S3에 업로드
             PutObjectRequest putObjectRequest = PutObjectRequest.builder()
                     .bucket(bucket)
                     .key(fileName)
                     .contentType(file.getContentType())
                     .build();
 
-            s3Client.putObject(putObjectRequest, RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
+            s3Client.putObject(putObjectRequest,
+                    RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
 
-            // 업로드된 파일의 URL 반환
             String fileUrl = getFileUrl(fileName);
-            log.info("프로필 이미지 업로드 성공 - userId: {}, url: {}", userId, fileUrl);
 
             return fileUrl;
 
         } catch (IOException e) {
-            log.error("파일 업로드 실패: {}", e.getMessage());
-            throw new CustomException(ErrorCode.FILE_UPLOAD_FAILED);
+            throw new CustomException((ErrorCode.FILE_UPLOAD_FAILED));
         }
+
     }
 
-    /**
-     * 프로필 이미지 삭제
-     */
-    public void deleteProfileImage(String fileUrl) {
+    //이미지 삭제
+    public void deleteImage(String fileUrl) {
         if (fileUrl == null || fileUrl.isBlank()) {
             return;
         }
 
-        // 카카오 URL이면 삭제하지 않음
-        if (fileUrl.contains("kakao")) {
+        // 외부 URL (카카오 프로필) 이면 삭제하지 않음
+        if (fileUrl.contains("kakao") || !fileUrl.contains(bucket)) {
             return;
         }
 
         try {
-            // URL에서 key 추출
             String key = extractKeyFromUrl(fileUrl);
 
             DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
@@ -97,11 +107,10 @@ public class S3Service {
                     .build();
 
             s3Client.deleteObject(deleteObjectRequest);
-            log.info("프로필 이미지 삭제 성공 - url: {}", fileUrl);
+            log.info("S3 파일 삭제 성공 - url: {}", fileUrl);
 
         } catch (Exception e) {
             log.error("파일 삭제 실패: {}", e.getMessage());
-            // 삭제 실패해도 에러 던지지 않음 (이미 없을 수 있음)
         }
     }
 

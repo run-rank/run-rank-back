@@ -14,6 +14,7 @@ import org.locationtech.jts.geom.LineString;
 import org.locationtech.jts.geom.PrecisionModel;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Map;
@@ -27,6 +28,7 @@ public class CourseService {
     private final CourseRepository courseRepository;
     private final GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
     private final RunningRecordRepository runningRecordRepository;
+    private final S3Service s3Service;
 
     public List<CourseResponseDto> getNearbyCourses(double lat, double lng, double radius) {
         return courseRepository.findNearbyCourses(lat, lng, radius)
@@ -36,8 +38,13 @@ public class CourseService {
     }
 
     @Transactional
-    public Long createCourse(CourseRequestDto requestDto, User user) {
+    public Long createCourse(CourseRequestDto requestDto, MultipartFile thumbnailFile, User user) {
         LineString path = createLineStrFromRoute(requestDto.getRoute());
+
+        String uploadedUrl = null;
+        if(thumbnailFile != null && !thumbnailFile.isEmpty()) {
+            uploadedUrl = s3Service.uploadCourseThumbnail(thumbnailFile, user.getId());
+        }
 
         Course course = Course.builder()
                 .user(user)
@@ -48,7 +55,7 @@ public class CourseService {
                 .path(path)
                 .route(requestDto.getRoute())
                 .visibility(requestDto.getVisibility())
-                .thumbnailUrl(requestDto.getThumbnailUrl())
+                .thumbnailUrl(uploadedUrl)
                 .build();
 
         return courseRepository.save(course).getId();

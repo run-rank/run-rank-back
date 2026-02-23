@@ -11,9 +11,11 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -30,12 +32,15 @@ public class CourseController {
             @ApiResponse(responseCode = "201", description = "코스 생성 성공"),
             @ApiResponse(responseCode = "401", description = "인증 실패: JWT 토큰 오류")
     })
-    @PostMapping
+    @PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<Long> createCourse(
-            @Valid @RequestBody CourseRequestDto requestDto,
+            @RequestPart("course") CourseRequestDto requestDto,
+            @RequestPart(value = "thumbnail", required = false) MultipartFile thumbnail,
             @AuthenticationPrincipal CustomUserDetails userDetails
+
     ) {
-        Long courseId = courseService.createCourse(requestDto, userDetails.getUser());
+        Long courseId = courseService.createCourse(requestDto, thumbnail, userDetails.getUser());
+
         return ResponseEntity.status(HttpStatus.CREATED).body(courseId);
     }
 
