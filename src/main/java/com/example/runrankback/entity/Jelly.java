@@ -27,9 +27,4 @@ public class Jelly extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     private JellyColor color; // RED, ORANGE, YELLOW, GREEN, BLUE, INDIGO, PURPLE, RAINBOW(Rare)
 
-    private boolean isNew; // 새로 획득한 젤리인지 여부
-
-    public void check() {
-        this.isNew = false;
-    }
 }
