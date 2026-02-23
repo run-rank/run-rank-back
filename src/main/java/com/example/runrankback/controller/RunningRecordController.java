@@ -1,6 +1,7 @@
 package com.example.runrankback.controller;
 
 import com.example.runrankback.dto.request.RecordRequestDto;
+import com.example.runrankback.dto.response.RecordCreateResponseDto;
 import com.example.runrankback.dto.response.RecordResponseDto;
 import com.example.runrankback.security.CustomUserDetails;
 import com.example.runrankback.service.RunningRecordService;
@@ -27,20 +28,18 @@ public class RunningRecordController {
 
     @Operation(summary = "러닝 기록 저장", description = "완료한 러닝 기록을 저장합니다.")
     @PostMapping
-    public ResponseEntity<Map<String, Object>> createRecord(
+    public ResponseEntity<RecordCreateResponseDto> createRecord(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @Valid @RequestBody RecordRequestDto requestDto
     ) {
         if(userDetails == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(Collections.singletonMap("error", "로그인이 필요합니다."));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
         Long userId = userDetails.getUserId();
-        Long recordId = recordService.createRecord(userId, requestDto);
+        RecordCreateResponseDto response = recordService.createRecord(userId, requestDto);
 
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(Collections.singletonMap("recordId", recordId));
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @Operation(summary = "러닝 기록 조회", description = "로그인한 사용자의 러닝 기록 목록을 조회합니다.")
