@@ -23,7 +23,6 @@ public class JellyResponseDto {
                 .color(jelly.getColor())
                 .typeDescription(jelly.getType().getDescription())
                 .colorDescription(jelly.getColor().getDescription())
-                .isNew(jelly.isNew())
                 .build();
     }
 }

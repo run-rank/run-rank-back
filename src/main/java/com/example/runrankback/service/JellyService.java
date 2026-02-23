@@ -51,7 +51,6 @@ public class JellyService {
                 .user(user)
                 .type(type)
                 .color(color)
-                .isNew(true)
                 .build();
 
         return jellyRepository.save(jelly);

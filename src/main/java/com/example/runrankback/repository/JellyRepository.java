@@ -10,6 +10,5 @@ import java.util.Optional;
 
 public interface JellyRepository extends JpaRepository<Jelly, Long> {
     List<Jelly> findByUserId(Long userId);
-    List<Jelly> findByUserIdAndIsNewTrue(Long userId);
     Optional<Jelly> findByUserIdAndTypeAndColor(Long userId, JellyType type, JellyColor color);
 }
