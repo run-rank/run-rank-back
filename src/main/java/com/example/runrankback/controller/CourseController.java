@@ -72,10 +72,29 @@ public class CourseController {
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "전체 코스 조회", description = "생성된 모든 코스를 최신순으로 조회합니다.")
+    @Operation(summary = "전체 코스 최신순 조회", description = "생성된 모든 코스를 최신순으로 조회합니다.")
     @GetMapping
     public ResponseEntity<List<CourseResponseDto>> getAllCourses() {
         List<CourseResponseDto> responses = courseService.getAllCourses();
+
+        return ResponseEntity.ok(responses);
+    }
+
+    @Operation(summary = "전체 코스 인기순 조회")
+    @GetMapping("/popular")
+    public ResponseEntity<List<CourseResponseDto>> getPopularCourses() {
+        List<CourseResponseDto> responses = courseService.getPopularCourses();
+
+        return ResponseEntity.ok(responses);
+    }
+
+    @Operation(summary = "내 코스 조회")
+    @GetMapping("/my")
+    public ResponseEntity<List<CourseResponseDto>> getMyCourses(
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        List<CourseResponseDto> responses = courseService.getMyCourses(userDetails.getUser());
+
         return ResponseEntity.ok(responses);
     }
 }

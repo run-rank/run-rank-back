@@ -1,6 +1,7 @@
 package com.example.runrankback.repository;
 
 import com.example.runrankback.entity.Course;
+import com.example.runrankback.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -28,4 +29,6 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
     void decreaseSavedCount(@Param("id") Long id);
 
     List<Course> findAllByOrderBySavedCountDesc();
+
+    List<Course> findAllByUserOrderByCreatedAtDesc(User user);
 }
