@@ -102,4 +102,22 @@ public class CourseService {
 
         return CourseResponseDto.from(course, myBestDuration);
     }
+
+    @Transactional(readOnly = true)
+    public List<CourseResponseDto> getPopularCourses() {
+        List<Course> courseList = courseRepository.findAllByOrderBySavedCountDesc();
+
+        return courseList.stream()
+                .map(CourseResponseDto::from)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<CourseResponseDto> getMyCourses(User user) {
+        List<Course> myCourseList = courseRepository.findAllByUserOrderByCreatedAtDesc(user);
+
+        return myCourseList.stream()
+                .map(CourseResponseDto::from)
+                .toList();
+    }
 }

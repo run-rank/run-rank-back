@@ -40,6 +40,8 @@ public class CourseBookmarkService {
                 .build();
 
         bookmarkRepository.save(newBookmark);
+
+        courseRepository.increaseSavedCount(courseId);
     }
 
     @Transactional
