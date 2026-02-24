@@ -43,6 +43,16 @@ CREATE TABLE course (
         REFERENCES users(id) ON DELETE CASCADE
 );
 
+CREATE TABLE course_bookmark (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    course_id BIGINT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_bookmark_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    CONSTRAINT fk_bookmark_course FOREIGN KEY (course_id) REFERENCES course(id) ON DELETE CASCADE,
+    CONSTRAINT unique_user_course UNIQUE (user_id, course_id)
+);
+
 CREATE TABLE running_record (
     id BIGSERIAL PRIMARY KEY,
     user_id BIGINT NOT NULL,
@@ -59,9 +69,23 @@ CREATE TABLE running_record (
         REFERENCES course(id) ON DELETE CASCADE
 );
 
+CREATE TABLE jelly (
+                       id BIGSERIAL PRIMARY KEY,
+                       user_id BIGINT NOT NULL,
+                       type VARCHAR(20) NOT NULL,
+                       color VARCHAR(20) NOT NULL,
+                       is_new BOOLEAN DEFAULT TRUE,
+                       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                       CONSTRAINT fk_jelly_user FOREIGN KEY (user_id)
+                           REFERENCES users(id) ON DELETE CASCADE
+);
+
 CREATE INDEX idx_course_path_gist ON course USING GIST (path);
 CREATE INDEX idx_record_course_duration ON running_record (course_id, duration);
 CREATE INDEX idx_record_user_date ON running_record (user_id, run_date DESC);
+CREATE INDEX idx_jelly_user ON jelly (user_id);
+CREATE INDEX idx_course_bookmark_user_id ON course_bookmark(user_id);
 
 CREATE TRIGGER update_course_modtime
     BEFORE UPDATE ON course
