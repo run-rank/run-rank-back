@@ -87,4 +87,14 @@ public class CourseController {
 
         return ResponseEntity.ok(responses);
     }
+
+    @Operation(summary = "내 코스 조회")
+    @GetMapping("/my")
+    public ResponseEntity<List<CourseResponseDto>> getMyCourses(
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        List<CourseResponseDto> responses = courseService.getMyCourses(userDetails.getUser());
+
+        return ResponseEntity.ok(responses);
+    }
 }
