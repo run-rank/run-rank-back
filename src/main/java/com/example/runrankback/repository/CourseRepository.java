@@ -2,6 +2,7 @@ package com.example.runrankback.repository;
 
 import com.example.runrankback.entity.Course;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -17,4 +18,14 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
     List<Course> findNearbyCourses(@Param("lat") double lat,
                                    @Param("lng") double lng,
                                    @Param("radius") double radius);
+
+    @Modifying
+    @Query("UPDATE Course c SET c.savedCount = c.savedCount + 1 WHERE c.id = :id")
+    void increaseSavedCount(@Param("id") Long id);
+
+    @Modifying
+    @Query("UPDATE Course c SET c.savedCount = c.savedCount - 1 WHERE c.id = :id")
+    void decreaseSavedCount(@Param("id") Long id);
+
+    List<Course> findAllByOrderBySavedCountDesc();
 }
