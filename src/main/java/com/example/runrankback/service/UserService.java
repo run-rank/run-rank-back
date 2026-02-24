@@ -49,7 +49,7 @@ public class UserService {
 
         // S3에서 이미지 삭제
         if (managedUser.getProfileImageUrl() != null) {
-            s3Service.deleteProfileImage(managedUser.getProfileImageUrl());
+            s3Service.deleteImage(managedUser.getProfileImageUrl());
         }
 
         // DB에서 URL 제거 (null로 설정 → 프론트에서 기본 이미지 처리)
@@ -106,7 +106,7 @@ public class UserService {
         if (profileImage != null && !profileImage.isEmpty()) {
             // 기존 이미지가 있으면 S3에서 삭제
             if (managedUser.getProfileImageUrl() != null) {
-                s3Service.deleteProfileImage(managedUser.getProfileImageUrl());
+                s3Service.deleteImage(managedUser.getProfileImageUrl());
             }
 
             // 새 이미지 업로드
