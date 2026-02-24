@@ -2,9 +2,28 @@ spring:
   profiles:
     active: local
 
+  # security
+  security:
+    oauth2:
+      client:
+        registration:
+          kakao:
+            client-id: ${KAKAO_API_KEY}
+            redirect-uri: ${KAKAO_REDIRECT_URI}
+            authorization-grant-type: authorization_code
+            client-authentication-method: client_secret_post
+            scope:
+              - profile_nickname
+              - account_email
+        provider:
+          kakao:
+            authorization-uri: https://kauth.kakao.com/oauth/authorize
+            token-uri: https://kauth.kakao.com/oauth/token
+            user-info-uri: https://kapi.kakao.com/v2/user/me
+            user-name-attribute: id
   # DB
   datasource:
-    url: jdbc:postgresql://localhost:5432/${POSTGRES_DB}
+    url: jdbc:postgresql://${DB_HOST}:5432/${POSTGRES_DB}?ssl=true&sslmode=require
     username: ${POSTGRES_USER}
     password: ${POSTGRES_PASSWORD}
     driver-class-name: org.postgresql.Driver
@@ -12,7 +31,7 @@ spring:
   jpa:
     # DB 구조는 Flyway로 관리. JPA는 검증만 하도록 설정 변경
     hibernate:
-      ddl-auto: validate
+      ddl-auto: update    # 추후 validate로 변경
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
@@ -27,6 +46,17 @@ spring:
 jwt:
   secret: ${JWT_SECRET}
   expiration-time: 86400000
+
+# AWS S3
+cloud:
+  aws:
+    s3:
+      bucket: ${AWS_S3_BUCKET}
+    credentials:
+      access-key: ${AWS_ACCESS_KEY}
+      secret-key: ${AWS_SECRET_KEY}
+    region:
+      static: ap-northeast-2
 
 logging:
   level:
