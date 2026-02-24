@@ -14,6 +14,11 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity // 스프링 시큐리티 설정을 활성화
@@ -26,11 +31,20 @@ public class SecurityConfig {
     private final OAuth2SucessHandler oAuth2SucessHandler;
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http, JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                // 기본 폼 로그인 비활성화
+                // CSRF 및 FormLogin 비활성화
+                .csrf(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
-                // oauth 내용
+                .httpBasic(AbstractHttpConfigurer::disable)
+
+                // CORS 설정 적용
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+
+                // 세션 정책 설정
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+
+                // oauth 설정
                 .oauth2Login(oauth2 -> oauth2
                         .loginPage("/oauth2/authorization/kakao")  // 기본 로그인 페이지 대신 카카오로 바로 이동
                         .userInfoEndpoint(userInfo -> userInfo
@@ -42,13 +56,13 @@ public class SecurityConfig {
                             response.getWriter().write("{\"error\": \"OAuth2 로그인 실패\", \"message\": \"" + exception.getMessage() + "\"}");
                         })
                 )
-                .csrf(AbstractHttpConfigurer::disable)
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+
+                // 요청 권한 제어
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/logout").authenticated()  // 로그아웃은 인증 필요
                         .requestMatchers("/api/auth/**").permitAll()       // 회원가입, 로그인 API 경로 허용
                         .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll()  // OAuth2 로그인 경로 허용
-                        .requestMatchers("/h2-console/**").permitAll()     // H2 데이터베이스 콘솔 허용
+//                        .requestMatchers("/h2-console/**").permitAll()     // H2 데이터베이스 콘솔 허용
                         .requestMatchers("/login", "/signup").permitAll()  // 나중에 만들 커스텀 HTML 페이지 경로 허용
                         .requestMatchers("/css/**", "/js/**").permitAll()// 페이지에 필요한 정적 리소스(CSS, JS) 허용
                         .requestMatchers("/v3/api-docs/**",
@@ -57,22 +71,35 @@ public class SecurityConfig {
                                 "/error").permitAll() // Swagger API 문서 경로 허용
                         .anyRequest().authenticated()                      // 그 외 모든 요청은 인증 필요
                 )
+
+                // 예외처림
                 .exceptionHandling(exception ->
                         exception.authenticationEntryPoint(jwtAuthenticationEntryPoint))
 
-                // 인증되지 않은 사용자가 보호된 페이지에 접근했을 때의 처리 (필요시 주석 해제)
-                /*
-                .exceptionHandling(ex -> ex
-                    .authenticationEntryPoint((request, response, authException) ->
-                        response.sendRedirect("/login"))               // 인증 없을 시 로그인 페이지로 강제 이동
-                )
-                */
-
+                // 헤더 설정
                 .headers(headers -> headers.frameOptions(options -> options.disable()))
-                .addFilterBefore(new JwtAuthenticationFilter(jwtProvider), UsernamePasswordAuthenticationFilter.class);
 
+                // JWT 필터
+                .addFilterBefore(new JwtAuthenticationFilter(jwtProvider), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 
+    // CORS 설정
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+
+        configuration.setAllowedOriginPatterns(List.of("*")); // 임시: 모든 오리진 허용
+
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+        configuration.setAllowedHeaders(List.of("*"));
+        configuration.setAllowCredentials(true);
+
+        configuration.setExposedHeaders(List.of("Authorization"));
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
 }
