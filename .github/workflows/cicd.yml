@@ -44,66 +44,18 @@ jobs:
             docker stop corun-backend || true
             docker rm corun-backend || true
             
-            name: CI/CD
-
-on:
-  push:
-    branches: [main, dev]
-
-jobs:
-
-  build:
-    if: github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-      - name: Login to docker hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-      - name: Build and Push
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          push: true
-          tags: |
-            ${{ secrets.DOCKER_USERNAME }}/corun-backend:latest
-            ${{ secrets.DOCKER_USERNAME }}/corun-backend:${{ github.sha }}
-
-  deploy:
-    needs: build
-    if: github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    steps:
-      - name: deploy to EC2
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ubuntu
-          key: ${{ secrets.EC2_SSH_KEY }}
-          script: |
-            docker pull ${{ secrets.DOCKER_USERNAME }}/corun-backend:latest
-            
-            docker stop corun-backend || true
-            docker rm corun-backend || true
-            
             docker run -d --name corun-backend \
               -p 8080:8080 \
-              -e DB_HOST=${{ secrets.DB_HOST }} \
-              -e POSTGRES_DB=${{ secrets.POSTGRES_DB }} \
-              -e POSTGRES_USER=${{ secrets.POSTGRES_USER }} \
-              -e POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} \
-              -e KAKAO_API_KEY=${{ secrets.KAKAO_API_KEY }} \
-              -e KAKAO_REDIRECT_URI=${{ secrets.KAKAO_REDIRECT_URI }} \
-              -e JWT_SECRET=${{ secrets.JWT_SECRET }} \
-              -e AWS_S3_BUCKET=${{ secrets.AWS_S3_BUCKET }} \
-              -e AWS_ACCESS_KEY=${{ secrets.AWS_ACCESS_KEY }} \
-              -e AWS_SECRET_KEY=${{ secrets.AWS_SECRET_KEY }} \
+              -e DB_HOST="${{ secrets.DB_HOST }}" \
+              -e POSTGRES_DB="${{ secrets.POSTGRES_DB }}" \
+              -e POSTGRES_USER="${{ secrets.POSTGRES_USER }}" \
+              -e POSTGRES_PASSWORD="${{ secrets.POSTGRES_PASSWORD }}" \
+              -e KAKAO_API_KEY="${{ secrets.KAKAO_API_KEY }}" \
+              -e KAKAO_REDIRECT_URI="${{ secrets.KAKAO_REDIRECT_URI }}" \
+              -e JWT_SECRET="${{ secrets.JWT_SECRET }}" \
+              -e AWS_S3_BUCKET="${{ secrets.AWS_S3_BUCKET }}" \
+              -e AWS_ACCESS_KEY="${{ secrets.AWS_ACCESS_KEY }}" \
+              -e AWS_SECRET_KEY="${{ secrets.AWS_SECRET_KEY }}" \
               ${{ secrets.DOCKER_USERNAME }}/corun-backend:latest
-            
-            docker image prune -f
             
             docker image prune -f
