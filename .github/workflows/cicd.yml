@@ -2,7 +2,7 @@ name: CI/CD
 
 on:
   push:
-    branches: [main, dev]
+    branches: [main]
 
 jobs:
 
@@ -46,16 +46,16 @@ jobs:
             
             docker run -d --name corun-backend \
               -p 8080:8080 \
-              -e DB_HOST=${{ secrets.DB_HOST }} \
-              -e POSTGRES_DB=${{ secrets.POSTGRES_DB }} \
-              -e POSTGRES_USER=${{ secrets.POSTGRES_USER }} \
-              -e POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} \
-              -e KAKAO_API_KEY=${{ secrets.KAKAO_API_KEY }} \
-              -e KAKAO_REDIRECT_URI=${{ secrets.KAKAO_REDIRECT_URI }} \
-              -e JWT_SECRET=${{ secrets.JWT_SECRET }} \
-              -e AWS_S3_BUCKET=${{ secrets.AWS_S3_BUCKET }} \
-              -e AWS_ACCESS_KEY=${{ secrets.AWS_ACCESS_KEY }} \
-              -e AWS_SECRET_KEY=${{ secrets.AWS_SECRET_KEY }} \
+              -e DB_HOST="${{ secrets.DB_HOST }}" \
+              -e POSTGRES_DB="${{ secrets.POSTGRES_DB }}" \
+              -e POSTGRES_USER="${{ secrets.POSTGRES_USER }}" \
+              -e POSTGRES_PASSWORD="${{ secrets.POSTGRES_PASSWORD }}" \
+              -e KAKAO_API_KEY="${{ secrets.KAKAO_API_KEY }}" \
+              -e KAKAO_REDIRECT_URI="${{ secrets.KAKAO_REDIRECT_URI }}" \
+              -e JWT_SECRET="${{ secrets.JWT_SECRET }}" \
+              -e AWS_S3_BUCKET="${{ secrets.AWS_S3_BUCKET }}" \
+              -e AWS_ACCESS_KEY="${{ secrets.AWS_ACCESS_KEY }}" \
+              -e AWS_SECRET_KEY="${{ secrets.AWS_SECRET_KEY }}" \
               ${{ secrets.DOCKER_USERNAME }}/corun-backend:latest
             
             docker image prune -f
