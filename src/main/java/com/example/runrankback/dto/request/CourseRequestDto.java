@@ -31,13 +31,10 @@ public class CourseRequestDto {
     @Schema(description = "공개 여부", example = "PUBLIC / PRIVATE")
     private Visibility visibility;
 
-    @Schema(description = "코스 썸네일 주소")
-    private String thumbnailUrl;
-
     @Builder
     public CourseRequestDto(String name, String description, Integer distance,
                             String encodedPolyline, List<Map<String, Object>> route,
-                            Visibility visibility, String thumbnailUrl
+                            Visibility visibility
     ) {
         this.name = name;
         this.description = description;
@@ -45,6 +42,5 @@ public class CourseRequestDto {
         this.encodedPolyline = encodedPolyline;
         this.route = route;
         this.visibility = visibility;
-        this.thumbnailUrl = thumbnailUrl;
     }
 }
