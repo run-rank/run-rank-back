@@ -7,6 +7,20 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: corun-pw!
+          POSTGRES_DB: corun
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
       - uses: actions/checkout@v4
       - name: Set up jdk 21
@@ -19,6 +33,14 @@ jobs:
         run: chmod +x gradlew
       - name: Run tests
         run: ./gradlew test
+      - name: Build and Test with Gradle
+        run: ./gradlew build
+        env:
+          DB_HOST: localhost
+          POSTGRES_USER: runner_admin
+          POSTGRES_PASSWORD: runner-pw!
+          POSTGRES_DB: running_db
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
 
   build:
     needs: test
