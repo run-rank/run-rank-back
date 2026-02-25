@@ -4,8 +4,10 @@ import com.example.runrankback.dto.request.CourseRequestDto;
 import com.example.runrankback.dto.response.CourseResponseDto;
 import com.example.runrankback.entity.Course;
 import com.example.runrankback.entity.User;
+import com.example.runrankback.repository.CourseBookmarkRepository;
 import com.example.runrankback.repository.CourseRepository;
 import com.example.runrankback.repository.RunningRecordRepository;
+import com.example.runrankback.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.locationtech.jts.geom.Coordinate;
@@ -29,6 +31,8 @@ public class CourseService {
     private final GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
     private final RunningRecordRepository runningRecordRepository;
     private final S3Service s3Service;
+    private final CourseBookmarkRepository courseBookmarkRepository;
+    private final UserRepository userRepository;
 
     public List<CourseResponseDto> getNearbyCourses(double lat, double lng, double radius) {
         return courseRepository.findNearbyCourses(lat, lng, radius)
@@ -95,12 +99,18 @@ public class CourseService {
                 .orElseThrow(() -> new EntityNotFoundException("코스를 찾을 수 없습니다."));
 
         Integer myBestDuration = null;
+        boolean isBookmarked = false;
+
         if(userId != null) {
             myBestDuration = runningRecordRepository.findBestDurationByCourseAndUser(courseId, userId)
                     .orElse(null);
+            
+            User user = userRepository.findById(userId)
+                    .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
+            isBookmarked = courseBookmarkRepository.findByUserAndCourse(user, course).isPresent();
         }
 
-        return CourseResponseDto.from(course, myBestDuration);
+        return CourseResponseDto.from(course, myBestDuration, isBookmarked);
     }
 
     @Transactional(readOnly = true)
