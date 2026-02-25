@@ -17,10 +17,11 @@ public class CourseResponseDto {
     private String thumbnailUrl;
     private String creatorName;
     private String creatorProfileImage;
+    private boolean isBookmarked;
 
     private Integer myBestDuration;
 
-    public static CourseResponseDto from(Course course, Integer myBestDuration) {
+    public static CourseResponseDto from(Course course, Integer myBestDuration, boolean isBookmarked) {
         return CourseResponseDto.builder()
                 .id(course.getId())
                 .name(course.getName())
@@ -31,10 +32,11 @@ public class CourseResponseDto {
                 .creatorName(course.getUser().getUserName())
                 .creatorProfileImage(course.getUser().getProfileImageUrl())
                 .myBestDuration(myBestDuration)
+                .isBookmarked(isBookmarked)
                 .build();
     }
 
     public static CourseResponseDto from(Course course) {
-        return from(course, null);
+        return from(course, null, false);
     }
 }
