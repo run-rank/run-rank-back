@@ -30,6 +30,12 @@ public class User {
     @Column // 카카오 프로필 이미지 URL
     private String profileImageUrl;
 
+    @Column
+    private Long totalDistance = 0L;
+
+    @Column
+    private Double totalScore = 0.0;
+
     @Builder
     public User (String email, String password, String userName, String provider, String profileImageUrl) {
         this.email = email;
@@ -37,6 +43,8 @@ public class User {
         this.userName = userName;
         this.provider = provider != null ? provider : "local";
         this.profileImageUrl = profileImageUrl;
+        this.totalDistance = 0L;
+        this.totalScore = 0.0;
     }
 
     // 프로필 이미지 업데이트 메서드
@@ -57,5 +65,14 @@ public class User {
     // 비밀번호 업데이트
     public void updatePassword(String password) {
         this.password = password;
+    }
+
+    public void addRunningRecord(int distance) {
+        this.totalDistance += distance;
+        this.totalScore += (distance * 0.5);    // 거리 * 0.5 (기존 점수에 누적)
+    }
+
+    public void addJellyScore() {
+        this.totalScore += 0.5;
     }
 }
