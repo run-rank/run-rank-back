@@ -48,7 +48,7 @@ public class RunningRecordService {
 
         // 젤리 지급 로직
         // 코스 러닝, 거리 1km 이상(디버깅으로 인해 값은 임시로 100), duration 0초 초과, GPS 데이터 유효
-        if (requestDto.getDistance() >= 1000 && requestDto.getDuration() > 0 && requestDto.getGpsRoute() != null && !requestDto.getGpsRoute().isEmpty()) {
+        if (requestDto.getDistance() >= 10 && requestDto.getDuration() > 0 && requestDto.getGpsRoute() != null && !requestDto.getGpsRoute().isEmpty()) {
             earnedJelly = jellyService.createRandomJelly(user);
         }
 
