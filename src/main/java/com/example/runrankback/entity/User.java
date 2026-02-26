@@ -68,11 +68,13 @@ public class User {
     }
 
     public void addRunningRecord(int distance) {
-        this.totalDistance += distance;
-        this.totalScore += (distance * 0.5);    // 거리 * 0.5 (기존 점수에 누적)
+        this.totalDistance = (this.totalDistance == null ? 0L : this.totalDistance) + distance;
+
+        double scoreFromDistance = distance * 0.5;
+        this.totalScore = (this.totalScore == null ? 0.0 : this.totalScore) + scoreFromDistance;
     }
 
     public void addJellyScore() {
-        this.totalScore += 0.5;
+        this.totalScore = (this.totalScore == null ? 0.0 : this.totalScore) + 0.5;
     }
 }

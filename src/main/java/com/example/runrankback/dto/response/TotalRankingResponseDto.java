@@ -18,8 +18,8 @@ public class TotalRankingResponseDto {
         return new TotalRankingResponseDto(
                 user.getUserName(),
                 user.getProfileImageUrl(),
-                user.getTotalDistance(),
-                user.getTotalScore()
+                user.getTotalDistance() == null ? 0L : user.getTotalDistance(),
+                user.getTotalScore() == null ? 0.0 : user.getTotalScore()
         );
     }
 }
